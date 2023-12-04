@@ -1,0 +1,4 @@
+root = true
+
+[*.{js,tsx}]
+indent_style = tab
