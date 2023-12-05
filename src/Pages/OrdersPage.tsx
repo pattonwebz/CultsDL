@@ -1,11 +1,11 @@
 // src/Pages/OrdersPage.tsx
 import React, { useEffect, useState } from 'react';
-import { Typography, Button, Divider, Box } from '@material-ui/core';
+import { Typography, Button } from '@material-ui/core';
 import OrdersTable from '../Componets/OrdersTable';
-import { BASE_URL } from '../Constants';
 import { CircularProgress, LinearProgress, Stack } from '@mui/material';
 import { processOrdersReply } from '../Processors/OrderProcessor';
-import {fetchDownloadPage} from "../Processors/DownloadPages";
+import { fetchDownloadPage } from '../Processors/DownloadPages';
+import { type Order } from '../Types/interfaces';
 
 const ipcRenderer = window.electron.ipcRenderer;
 
@@ -16,12 +16,13 @@ const OrdersPage: React.FC = () => {
 	};
 
 	const [isFetchingOrders, setIsFetchingOrders] = useState(false);
+	const [isFetchingDownloadPages, setIsFetchingDownloadPages] = useState(false);
 
-	const [orders, setOrders] = React.useState([]);
+	const [orders, setOrders] = React.useState<Order[]>([]);
 	const [nextPage, setNextPage] = React.useState('');
 	const [selectedOrderRows, setSelectedOrderRows] = React.useState([]);
 
-	let ordersLocal = [];
+	let ordersLocal: Order[] = [];
 
 	useEffect(() => {
 		console.log('changed in parent');
@@ -42,10 +43,10 @@ const OrdersPage: React.FC = () => {
 
 	useEffect(() => {
 		ipcRenderer.send('get-orders-from-file');
-		ipcRenderer.on('get-orders-from-file-reply', (event, orders) => {
+		ipcRenderer.on('get-orders-from-file-reply', (_, orders) => {
 			setOrders(orders);
 		});
-		ipcRenderer.on('fetch-orders-reply', (event, html) => {
+		ipcRenderer.on('fetch-orders-reply', (_, html) => {
 			const newOrders = processOrdersReply(html, setNextPage);
 			ordersLocal = ordersLocal.concat(newOrders);
 			setOrders(ordersLocal);
@@ -72,53 +73,21 @@ const OrdersPage: React.FC = () => {
 			id: order.number,
 			number: order.number,
 			date: order.date,
-			itemCount: order.creations.length,
-			items: order.creations,
+			itemCount: order?.creations?.length ?? 0,
+			items: order?.creations,
 			price: order.price,
 			link: order.link
 		};
 	});
 
-	function handleFetchDownloadPages (): void {
+	async function handleFetchDownloadPages (): Promise<void> {
+		setIsFetchingOrders(true);
 		const selectedOrderRowsData = rows.filter((row) => {
 			return selectedOrderRows.includes(row.id);
 		});
-		console.log(selectedOrderRowsData);
-		fetchDownloadPage(selectedOrderRowsData);
-		// let data = [];
-		// selectedOrderRowsData.forEach((row) => {
-		//     data.downloadPage = row.link;
-		//     data.number = row.number;
-		//     row.items.forEach((item) => {
-		//         data.item = item.link;
-		//     });
-		// });
-		// MARKER
-		// ipcRenderer.send('fetch-download-page', selectedOrderRowsData[0].link);
-		// ipcRenderer.on('fetch-download-page-reply', (event, html) => {
-		// 	console.log('fetch-download-page-reply');
-		// 	console.log(html);
-		// 	const parser = new DOMParser();
-		// 	const doc = parser.parseFromString(html, 'text/html');
-		//
-		// 	const downloadButtonsContainer = doc.querySelector('#content > .grid > .grid-cell:not(.grid-cell--fit)');
-		// 	// console.log(downloadButtonsContainer);
-		// 	if (!downloadButtonsContainer) {
-		// 		console.log('no download buttons container found');
-		// 		return;
-		// 	}
-		// 	const downloadButtons = downloadButtonsContainer.querySelectorAll('a.btn');
-		// 	if (downloadButtons.length < 1) {
-		// 		console.log('no download buttons found');
-		// 		return;
-		// 	}
-		//
-		// 	downloadButtons.forEach((button) => {
-		// 		console.log(button.href);
-		// 		ipcRenderer.send('download-file', button.href.replace('file://', BASE_URL));
-		// 	});
-		// });
-		// MARKER END
+		await fetchDownloadPage(selectedOrderRowsData).then(() => {
+			setIsFetchingDownloadPages(false);
+		});
 	}
 
 	return (
@@ -139,7 +108,7 @@ const OrdersPage: React.FC = () => {
 
 				</Button>
 				<Button variant="contained" color="secondary" onClick={handleFetchDownloadPages}
-					disabled={selectedOrderRows.length < 1}>
+					disabled={selectedOrderRows.length < 1 || isFetchingDownloadPages}>
                     Fetch Download Pages for selected orders
 				</Button>
 			</Stack>

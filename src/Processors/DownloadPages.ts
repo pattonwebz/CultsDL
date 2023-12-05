@@ -7,7 +7,7 @@ export async function fetchDownloadPage (selectedOrderRowsData: any): Promise<vo
 	for (const orderRowData of selectedOrderRowsData) {
 		ipcRenderer.send('fetch-download-page', orderRowData.link, orderRowData.id);
 		await new Promise(resolve => {
-			ipcRenderer.on('fetch-download-page-reply', async (event, html, number) => {
+			ipcRenderer.on('fetch-download-page-reply', (_, html, number) => {
 				const parser = new DOMParser();
 				const doc = parser.parseFromString(html, 'text/html');
 
@@ -24,11 +24,15 @@ export async function fetchDownloadPage (selectedOrderRowsData: any): Promise<vo
 					return;
 				}
 
-				const downloadLinks = {};
+				const downloadLinks: Record<string, string[]> = {};
 
 				Array.from(downloadButtons)
 					.forEach((button) => {
-						const creationName = button.href.split('creation=')[1];
+						let creationName = button.href.split('creation=')[1];
+						if (creationName == null) {
+							console.log('no creation name found faking it with ##UNKNOWNCREATOR##');
+							creationName = '##UNKNOWNCREATOR##';
+						}
 						if (downloadLinks[creationName] == null) {
 							downloadLinks[creationName] = [];
 						}
@@ -38,16 +42,33 @@ export async function fetchDownloadPage (selectedOrderRowsData: any): Promise<vo
 
 				console.log(downloadLinks);
 
-				const objtosend = {
+				const orderInfo = {
 					orderNumber: number,
 					downloadLinks
 				};
-				resolve(objtosend);
+				resolve(orderInfo);
 			});
-		}).then((objtosend) => {
-			// console.log('sending objtosend');
-			// console.log(objtosend);
-			ipcRenderer.send('add-order-download-links-to-orders-json-file', objtosend);
+		}).then((orderInfo) => {
+			console.log('orderInfo', orderInfo);
+			Object.entries(orderInfo.downloadLinks).forEach((downloadLink) => {
+				console.log('downloadLinkGroups', downloadLink);
+				downloadLink.forEach((linksArray) => {
+					console.log('linksArray', linksArray);
+					if (Array.isArray(linksArray)) {
+						console.log('linksArray is an array');
+						linksArray.forEach((link) => {
+							console.log('link', link);
+							if (link.includes('https://cults3d.com/')) {
+								console.log('sending download-file', link);
+								ipcRenderer.send('download-file', link);
+							} else {
+								console.log('not sending download-file', link);
+							}
+						});
+					}
+				});
+			});
+			ipcRenderer.send('add-order-download-links-to-orders-json-file', orderInfo);
 		});
 	}
 }

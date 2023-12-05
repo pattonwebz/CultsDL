@@ -1,7 +1,7 @@
 // Server/fetchPages.js
 const { net, BrowserWindow } = require('electron');
 const cache = require('./cache');
-const { getSessionToken } = require('./sessionTokenStore');
+const { getSessionToken } = require('./userDataStore');
 
 const getDownloadPages = (url = '', orderNumber) => {
 	const pageToRequest = url;

@@ -15,11 +15,22 @@ export function processOrdersReply (html: string, setNextPage: (nextPage: string
 
 	const newOrders: Order[] = [];
 	doc.querySelectorAll('#content table tbody tr').forEach((row) => {
-		const cells = row.querySelectorAll('td');
-		const orderNumber = cells[0].textContent.trim();
-		const orderDate = cells[1].textContent.trim();
-		const orderTotal = cells[3].textContent.trim();
-		const orderLink = cells[4].querySelector('a').href.replace('file://', BASE_URL).trim();
+		const cells = row.querySelectorAll<HTMLTableCellElement>('td');
+		if (cells.length < 5) {
+			console.log('not enough cells in row');
+			return;
+		}
+		// check if cells[0] through cells[4] are valid
+		if ((cells[0] == null) || (cells[1] == null) || (cells[3] == null) || (cells[4] == null)) {
+			console.log('one of the cells is null');
+			return;
+		}
+
+		const orderNumber = cells[0]?.textContent?.trim() ?? '';
+		const orderDate = cells[1]?.textContent?.trim() ?? '';
+		const orderTotal = cells[3]?.textContent?.trim() ?? '';
+		const orderLinkElement = cells[4]?.querySelector('a');
+		const orderLink = (orderLinkElement != null) ? orderLinkElement.href.replace('file://', BASE_URL).trim() : '';
 
 		const order: Order = {
 			number: orderNumber,
@@ -35,11 +46,11 @@ export function processOrdersReply (html: string, setNextPage: (nextPage: string
 			// if there is a details.help element, then it is a private link
 			const privateLink = cell.querySelector('details.help');
 			if (privateLink != null) {
-				const title = privateLink.querySelector('summary').title;
-				const thumbnail = privateLink.querySelector('img').src;
+				const title = privateLink?.querySelector('summary')?.title ?? '';
+				const thumbnail = privateLink?.querySelector('img')?.src ?? '';
 				const creatorLink = cell.querySelector('.btn-plain');
-				const parts = creatorLink.href.split('/');
-				const creator = parts[5]; // 'TaterBeard'
+				const parts = creatorLink instanceof HTMLAnchorElement ? creatorLink.href.split('/') : '';
+				const creator = parts[5];
 
 				creations.push({
 					title,
@@ -55,7 +66,10 @@ export function processOrdersReply (html: string, setNextPage: (nextPage: string
 			const messagesLink = cell.querySelector('.btn-plain');
 			const thumbnail = cell.querySelector('.painting-image');
 
-			if ((link != null) && (messagesLink != null) && (thumbnail != null)) {
+			if ((link != null) &&
+				(messagesLink != null && messagesLink instanceof HTMLAnchorElement) &&
+				(thumbnail != null && thumbnail instanceof HTMLImageElement)
+			) {
 				const dataTitle = link.title;
 				const href = link.href;
 				const messagesHref = messagesLink.href;

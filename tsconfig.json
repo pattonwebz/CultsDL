@@ -107,5 +107,6 @@
     "skipLibCheck": true,
     /* Skip type checking all .d.ts files. */
     "jsx": "react"
-  }
+  },
+  "include": ["**/*.ts", "**/*.tsx"]
 }

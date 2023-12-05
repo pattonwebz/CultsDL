@@ -1,6 +1,6 @@
 // ipcHandlers.js
 const { ipcMain } = require('electron');
-const { getSessionToken, saveSessionToken } = require('./sessionTokenStore');
+const { getSessionToken, saveSessionToken, getUserData, saveDownloadDirectory } = require('./userDataStore');
 const getOrders = require('./fetchOrders');
 const cache = require('./cache');
 const { writeFile, existsSync, mkdirSync, readFileSync } = require('fs');
@@ -16,8 +16,17 @@ const setupIpcHandlers = () => {
 		event.reply('sessionToken', getSessionToken());
 	});
 
+	ipcMain.on('requestUserData', (event) => {
+		console.log('requestUserData');
+		event.reply('userData-reply', getUserData());
+	});
+
 	ipcMain.on('saveSessionToken', (event, token) => {
 		saveSessionToken(token);
+	});
+
+	ipcMain.on('saveDownloadDirectory', (event, directory) => {
+		saveDownloadDirectory(directory);
 	});
 
 	ipcMain.on('fetch-orders', async (event, url = '') => {

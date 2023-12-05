@@ -1,19 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import { useSessionToken } from '../Contexts/SessionTokenContext';
+import { useUserData } from '../Contexts/UserDataContext';
 import { TextField, Button, Grid, Snackbar, Typography } from '@material-ui/core';
-import MuiAlert, { type AlertProps } from '@material-ui/lab/Alert';
+import MuiAlert, { AlertProps } from '@material-ui/lab/Alert';
 
 function Alert (props: AlertProps): React.ReactElement {
 	return <MuiAlert elevation={6} variant="filled" {...props} />;
 }
 
 const SessionTokenInput: React.FC = () => {
-	const { getSessionToken, saveSessionToken } = useSessionToken();
+	const { getSessionToken, saveSessionToken } = useUserData();
 	const [sessionToken, setSessionToken] = useState(getSessionToken());
 	const [open, setOpen] = useState(false);
 
 	const handleSave = (): void => {
-		saveSessionToken(sessionToken);
+		setSessionToken(sessionToken);
 		setOpen(true);
 	};
 
@@ -25,8 +25,8 @@ const SessionTokenInput: React.FC = () => {
 	};
 
 	useEffect(() => {
-		setSessionToken(getSessionToken());
-	}, [saveSessionToken]);
+		saveSessionToken(getSessionToken());
+	}, [sessionToken]);
 
 	return (
 		<Grid container direction="column" alignItems="flex-start" spacing={2}>

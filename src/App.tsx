@@ -1,5 +1,4 @@
 import React from 'react';
-import { SessionTokenProvider } from './Contexts/SessionTokenContext';
 import { CssBaseline } from '@material-ui/core';
 import { ThemeProvider } from '@material-ui/core/styles';
 import theme from './Themes/MuiTheme';
@@ -9,6 +8,7 @@ import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 import AppRouter from './Componets/AppRouter';
+import {UserDataProvider} from './Contexts/UserDataContext';
 
 declare global {
 	interface Window {
@@ -28,9 +28,9 @@ const App: React.FC = () => {
 		<>
 			<ThemeProvider theme={theme}>
 				<CssBaseline />
-				<SessionTokenProvider>
+				<UserDataProvider>
 					<AppRouter />
-				</SessionTokenProvider>
+				</UserDataProvider>
 			</ThemeProvider>
 		</>
 	);

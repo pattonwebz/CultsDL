@@ -4,7 +4,7 @@
         "es2021": true
     },
     "extends": [
-        "standard-with-typescript",
+        "standard",
         "plugin:react/recommended"
     ],
     "parserOptions": {
@@ -15,10 +15,8 @@
         "react"
     ],
     "rules": {
-        "@typescript-eslint/indent": ["error", "tab", {"SwitchCase": 1}],
         "indent": ["error", "tab", {"SwitchCase": 1}],
         "no-tabs": "off",
-        "semi": ["error", "always"],
-        "@typescript-eslint/semi": ["error", "always"]
+        "semi": ["error", "always"]
     }
 }
