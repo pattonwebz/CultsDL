@@ -1,5 +1,5 @@
 // main.js
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, Menu } = require('electron');
 const { getSessionToken, getUserData } = require('./Server/userDataStore');
 
 const { join } = require('path');
@@ -28,7 +28,10 @@ function createWindow () {
 		}
 	});
 
-	win.loadFile('index.html');
+	win.loadFile('index.html')
+		.then(() => {
+			console.log('index.html loaded');
+		});
 
 	ipcMain.on('trySetCookie', () => {
 		trySetCookie();
@@ -85,6 +88,7 @@ function createWindow () {
 
 		downloadItem.on('updated', (event, state) => {
 			if (state === 'interrupted') {
+				console.log('Download is interrupted but can be resumed');
 			} else if (state === 'progressing') {
 				if (downloadItem.isPaused()) {
 					console.log('Download is paused');
@@ -127,7 +131,7 @@ function trySetCookie () {
 
 	const cookie = { url: 'https://cults3d.com', name: '_session_id', value: getSessionToken() };
 
-	// I don't know how to handle cookie expiry so I just remove it and set it again
+	// I don't know how to handle cookie expiry, so I just remove it and set it again
 	session.defaultSession.cookies.remove(cookie.url, cookie.name)
 		.then(() => {
 			console.log('Cookie removed successfully');
@@ -142,6 +146,10 @@ function trySetCookie () {
 			console.error('Failed to remove cookie:', error);
 		});
 }
+
+app.on('ready', () => {
+	Menu.setApplicationMenu(null);
+});
 
 app.whenReady().then(() => {
 	trySetCookie();
