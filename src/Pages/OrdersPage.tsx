@@ -1,6 +1,6 @@
 // src/Pages/OrdersPage.tsx
 import React, { useEffect, useState } from 'react';
-import { Typography, Button } from '@material-ui/core';
+import {Typography, Button, Box} from '@material-ui/core';
 import OrdersTable from '../Componets/OrdersTable';
 import { CircularProgress, LinearProgress, Stack } from '@mui/material';
 import { processOrdersReply } from '../Processors/OrderProcessor';
@@ -106,10 +106,6 @@ const OrdersPage: React.FC = () => {
 		});
 	}, []);
 
-	useEffect(() => {
-
-	}, []);
-
 	async function handleFetchDownloadPages (): Promise<void> {
 		setIsFetchingDownloadPages(true);
 		const selectedOrderRowsData = ordersWithCreations.filter((row) => {
@@ -123,7 +119,10 @@ const OrdersPage: React.FC = () => {
 	return (
 		<div>
 			<Typography variant="h4">
-                Welcome to the Orders Page!
+                Orders
+			</Typography>
+			<Typography variant="body1">
+				You can fetch your orders here and the creations that are in them. It's broken into 3 parts on purpose since 3 pages are required to be read for every creation, the order, the download page and the creation page itself. It's not reliable that you can get to the actual creation page from the download page since sometimes they are removed. It's also unclear if there will be one or many files attached of what format they will be in.
 			</Typography>
 			<Stack direction="row" spacing={2} sx={{ mb: 2 }}>
 				<Button variant="contained" color="primary" onClick={handleFetchOrders}
@@ -143,6 +142,7 @@ const OrdersPage: React.FC = () => {
 				</Button>
 			</Stack>
 
+			<Box sx={{ minHeight: '48px' }}>
 			{(progress.fileName !== '') && (
 				<Typography variant="body2">
 					{(progress.totalInQueue !== 0) && (
@@ -154,6 +154,7 @@ const OrdersPage: React.FC = () => {
                 Current Download: {progress.fileName}
 				</Typography>
 			)}
+			</Box>
 
 			<LinearProgress variant="determinate" value={progress.progress}/>
 			<OrdersTable rows={ordersWithCreations} onSelectionChange={setSelectedOrderRows}/>
