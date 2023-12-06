@@ -12,3 +12,7 @@ export interface Creation {
     link: string
     creator: string
 }
+
+export interface OrdersTableProps {
+	rows: any[];
+}
