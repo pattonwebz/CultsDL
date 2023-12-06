@@ -8,7 +8,6 @@ import { fetchDownloadPage } from '../Processors/DownloadPages';
 import { type Order } from '../Types/interfaces';
 import CreationsTableDB from '../Componets/CreationsTableDB';
 import OrdersTableDB from '../Componets/OrdersTableDB';
-import OrdersTableNew from '../Componets/OrdersTableNew';
 
 const ipcRenderer = window.electron.ipcRenderer;
 
