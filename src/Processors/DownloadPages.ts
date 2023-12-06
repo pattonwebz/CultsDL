@@ -5,6 +5,8 @@ const ipcRenderer = window.electron.ipcRenderer;
 
 export async function fetchDownloadPage (selectedOrderRowsData: any): Promise<void> {
 	for (const orderRowData of selectedOrderRowsData) {
+		console.log('fetching download page for order', orderRowData.id);
+		console.log('fetching download page for order', orderRowData.link)
 		ipcRenderer.send('fetch-download-page', orderRowData.link, orderRowData.id);
 		await new Promise(resolve => {
 			ipcRenderer.on('fetch-download-page-reply', (_, html, number) => {

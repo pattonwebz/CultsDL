@@ -111,6 +111,8 @@ const OrdersPage: React.FC = () => {
 		const selectedOrderRowsData = ordersWithCreations.filter((row) => {
 			return selectedOrderRows.includes(row.id);
 		});
+		console.log('selectedOrderRowsData', selectedOrderRowsData);
+		console.log(await ipcRenderer.invoke('get-order-by-id', selectedOrderRowsData[0].id));
 		await fetchDownloadPage(selectedOrderRowsData).then(() => {
 			setIsFetchingDownloadPages(false);
 		});
