@@ -25,7 +25,8 @@ function createWindow () {
 			enableRemoteModule: true,
 			preload: join(__dirname, 'preload.js'),
 			contextIsolation: true // contextIsolation must be enabled
-		}
+		},
+		autoHideMenuBar: true
 	});
 
 	win.loadFile('index.html')
@@ -146,10 +147,6 @@ function trySetCookie () {
 			console.error('Failed to remove cookie:', error);
 		});
 }
-
-app.on('ready', () => {
-	Menu.setApplicationMenu(null);
-});
 
 app.whenReady().then(() => {
 	trySetCookie();
