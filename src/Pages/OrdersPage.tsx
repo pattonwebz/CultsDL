@@ -6,6 +6,9 @@ import { CircularProgress, LinearProgress, Stack } from '@mui/material';
 import { processOrdersReply } from '../Processors/OrderProcessor';
 import { fetchDownloadPage } from '../Processors/DownloadPages';
 import { type Order } from '../Types/interfaces';
+import CreationsTableDB from '../Componets/CreationsTableDB';
+import OrdersTableDB from '../Componets/OrdersTableDB';
+import OrdersTableNew from '../Componets/OrdersTableNew';
 
 const ipcRenderer = window.electron.ipcRenderer;
 
@@ -23,10 +26,6 @@ const OrdersPage: React.FC = () => {
 	const [selectedOrderRows, setSelectedOrderRows] = React.useState([]);
 
 	let ordersLocal: Order[] = [];
-
-	useEffect(() => {
-		console.log('changed in parent');
-	}, [selectedOrderRows]);
 
 	const [progress, setProgress] = useState({
 		totalInQueue: 0,
@@ -68,17 +67,49 @@ const OrdersPage: React.FC = () => {
 		}
 	}, [orders]);
 
-	const rows = orders.map((order) => {
-		return {
-			id: order.number,
-			number: order.number,
-			date: order.date,
-			itemCount: order?.creations?.length ?? 0,
-			items: order?.creations,
-			price: order.price,
-			link: order.link
-		};
-	});
+	const [dbOrders, setDbOrders] = useState([]);
+	const [dbCreations, setDbCreations] = useState([]);
+	const [ordersWithCreations, setOrdersWithCreations] = useState([]);
+
+	useEffect(() => {
+		ipcRenderer.send('get-orders-from-db');
+		ipcRenderer.on('get-orders-from-db-reply', (_, orders) => {
+			console.log('got orders from db');
+			console.log(orders);
+			setDbOrders(orders);
+		});
+
+		ipcRenderer.send('get-creations-from-db');
+		ipcRenderer.on('get-creations-from-db-reply', (_, creations) => {
+			console.log('got creations from db');
+			console.log(creations);
+			setDbCreations(creations);
+		});
+
+		ipcRenderer.send('get-orders-with-creations');
+		ipcRenderer.on('get-orders-with-creations-reply', (_, ordersAndCreations) => {
+			console.log('got orders with creations from db');
+			console.log(ordersAndCreations);
+			const processedOrders = ordersAndCreations.map((orderAndCreation) => {
+				return {
+					id: orderAndCreation.id,
+					number: orderAndCreation.order_number,
+					date: orderAndCreation.order_date,
+					itemCount: orderAndCreation.creations.length,
+					creations: orderAndCreation.creations,
+					price: orderAndCreation.order_total,
+					link: orderAndCreation.order_link
+				}
+			});
+			console.log(processedOrders);
+			setOrdersWithCreations(processedOrders);
+
+		});
+	}, []);
+
+	useEffect(() => {
+
+	}, []);
 
 	async function handleFetchDownloadPages (): Promise<void> {
 		setIsFetchingOrders(true);
@@ -126,7 +157,7 @@ const OrdersPage: React.FC = () => {
 			)}
 
 			<LinearProgress variant="determinate" value={progress.progress}/>
-			<OrdersTable rows={rows} onSelectionChange={setSelectedOrderRows}/>
+			<OrdersTable rows={ordersWithCreations} onSelectionChange={setSelectedOrderRows}/>
 		</div>
 	);
 };
