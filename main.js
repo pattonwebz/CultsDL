@@ -39,8 +39,10 @@ function createWindow () {
 	});
 
 	win.webContents.on('did-finish-load', () => {
-		const sessionToken = getSessionToken();
-		win.webContents.send('sessionToken', sessionToken);
+		// const sessionToken = getUserData('sessionToken');
+		// win.webContents.send('sessionToken', sessionToken);
+		// const downloadDir = getUserData('downloadDirectory');
+		// win.webContents.send('downloadDirectory', downloadDir);
 
 		trySetCookie();
 
