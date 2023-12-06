@@ -14,6 +14,8 @@ const { DATA_DIR } = CONSTANTS;
 const { getDB, closeDB } = require('./database/getDB');
 const allOrderPagesParsed = require('./database/allOrderPagesParsed');
 const getOrdersWithCreations = require('./database/getOrdersWithCreations');
+const {getOrderById} = require("./database/getOrderByX");
+const {getCreationsByOrderId} = require("./database/getCreationByX");
 
 const setupIpcHandlers = () => {
 	ipcMain.on('requestSessionToken', (event) => {
@@ -97,6 +99,31 @@ const setupIpcHandlers = () => {
 
 	ipcMain.on('fetch-download-page', async (event, url = '', orderNumber = '') => {
 		getDownloadPages(url, orderNumber);
+	});
+
+	// get the order from database with the orderNumber matching the item id
+	ipcMain.handle('get-order-by-id', async (event, itemId) => {
+		console.log('\n\n\n\n\n\n\n\n');
+		console.log('get-order-by-id', itemId);
+		const order = await getOrderById(itemId);
+		console.log(order);
+
+		const creations = await getCreationsByOrderId(order.id);
+
+		console.log('\n\n\n\n\n\n\n\n');
+		console.log('creations:', creations);
+		return order;
+	});
+
+	ipcMain.handle('get-creations-by-order-id', async (event, orderId) => {
+		console.log('get-creations-by-order-id', orderId);
+		const creations = await getCreationsbyOrderId(orderId);
+		return creations;
+	});
+
+	ipcMain.handle('get-creations-by-order-number', async (event, orderNumber) => {
+		console.log('get-creations-by-order-number', orderNumber);
+		const creations = await getCreationsByOrderNumber(orderNumber);
 	});
 
 	ipcMain.on('add-order-download-links-to-orders-json-file', async (event, data) => {

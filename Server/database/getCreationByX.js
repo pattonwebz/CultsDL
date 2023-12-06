@@ -1,0 +1,25 @@
+const { getRowsByColumnWhereValue } = require('./getRowInColumnByValue');
+
+const getCreationsByX = async (column = 'creation_order_number', value = 0, limit = 500) => {
+	if (!column || !value) {
+		return null;
+	}
+	return getRowsByColumnWhereValue('creations', column, value, limit);
+};
+
+const getCreationsById = async (id, limit = 500) => {
+	if (!id || id === 0) {
+		return null;
+	}
+	return getCreationsByX('id', id, limit);
+};
+
+const getCreationById = async (id) => {
+	return getCreationsByX('id', id, 1);
+};
+
+const getCreationsByOrderId = async (orderId, limit = 500) => {
+	return getCreationsByX('creation_order_id', orderId, limit);
+};
+
+module.exports = { getCreationsByX, getCreationsById, getCreationById, getCreationsByOrderId };
