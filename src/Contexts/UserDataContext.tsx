@@ -4,7 +4,8 @@ const ipcRenderer = window.electron.ipcRenderer;
 
 const UserDataContext = createContext(null);
 
-const UserDataProvider = ({ children }) => {
+
+const UserDataProvider: React.FC<PropsWithChildren<any>> = ({ children }) => {
 	const [sessionToken, setSessionToken] = useState('');
 	const [downloadDirectory, setDownloadDirectory] = useState('');
 
