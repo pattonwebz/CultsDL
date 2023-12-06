@@ -112,7 +112,7 @@ const OrdersPage: React.FC = () => {
 
 	async function handleFetchDownloadPages (): Promise<void> {
 		setIsFetchingOrders(true);
-		const selectedOrderRowsData = rows.filter((row) => {
+		const selectedOrderRowsData = ordersWithCreations.filter((row) => {
 			return selectedOrderRows.includes(row.id);
 		});
 		await fetchDownloadPage(selectedOrderRowsData).then(() => {
