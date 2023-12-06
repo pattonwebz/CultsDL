@@ -11,6 +11,12 @@ export async function fetchDownloadPage (selectedOrderRowsData: any): Promise<vo
 				const parser = new DOMParser();
 				const doc = parser.parseFromString(html, 'text/html');
 
+				const loggedIn = doc.querySelector('.nav__action-login > details > summary > img[title="Manage my profile"]') != null;
+				if (!loggedIn) {
+					console.log('not logged in');
+					resolve(null);
+					return;
+				}
 				const downloadButtonsContainer = doc.querySelector('#content > .grid > .grid-cell:not(.grid-cell--fit)');
 				if (downloadButtonsContainer == null) {
 					console.log('no download buttons container found');
