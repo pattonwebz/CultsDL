@@ -14,7 +14,6 @@ const { DATA_DIR } = CONSTANTS;
 const { getDB, closeDB } = require('./database/getDB');
 const allOrderPagesParsed = require('./database/allOrderPagesParsed');
 const getOrdersWithCreations = require('./database/getOrdersWithCreations');
-const { downloadFile } = require('./downloadQueue');
 
 const setupIpcHandlers = () => {
 	ipcMain.on('requestSessionToken', (event) => {
@@ -172,11 +171,6 @@ const setupIpcHandlers = () => {
 	ipcMain.on('get-orders-with-creations', async (event) => {
 		const orders = await getOrdersWithCreations();
 		event.reply('get-orders-with-creations-reply', orders);
-	});
-
-	ipcMain.on('download-file', (event, url) => {
-		console.log('download-file', url);
-		downloadFile(url);
 	});
 };
 
