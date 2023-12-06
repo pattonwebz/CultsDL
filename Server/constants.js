@@ -10,6 +10,7 @@ const CONSTANTS = {
 	BASE_DIR: join(homedir(), '.cultsDL'),
 	DATA_DIR: join(homedir(), '.cultsDL', 'data'),
 	CACHE_DIR: join(homedir(), '.cultsDL', 'data', '.cache'),
+	DATABASE_DIR: join(homedir(), '.cultsDL', 'data', 'db'),
 	DOWNLOAD_DIR: join(homedir(), '.cultsDL', 'data', 'downloads')
 };
 
