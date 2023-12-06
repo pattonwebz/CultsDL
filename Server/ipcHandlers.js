@@ -11,6 +11,10 @@ const getDownloadPages = require('./fetchDownloadItems');
 const { CONSTANTS } = require('./constants');
 const { DATA_DIR } = CONSTANTS;
 
+const { getDB, closeDB } = require('./database/getDB');
+const allOrderPagesParsed = require('./database/allOrderPagesParsed');
+const getOrdersWithCreations = require('./database/getOrdersWithCreations');
+
 const setupIpcHandlers = () => {
 	ipcMain.on('requestSessionToken', (event) => {
 		event.reply('sessionToken', getSessionToken());
@@ -79,6 +83,10 @@ const setupIpcHandlers = () => {
 		writeFile(DATA_DIR + '/orders.json', JSON.stringify(allOrders, null, 2), (err) => {
 			if (err) throw err;
 		});
+		// event.reply('all-order-pages-parsed-reply');
+
+		await allOrderPagesParsed(orders);
+
 		event.reply('all-order-pages-parsed-reply');
 	});
 
@@ -136,6 +144,33 @@ const setupIpcHandlers = () => {
 		writeFile(DATA_DIR + '/orders.json', JSON.stringify(orders, null, 2), (err) => {
 			if (err) throw err;
 		});
+	});
+
+	ipcMain.on('get-orders-from-db', (event) => {
+		const db = getDB();
+		db.all('SELECT * FROM orders', [], (err, rows) => {
+			if (err) {
+				throw err;
+			}
+			event.reply('get-orders-from-db-reply', rows);
+		});
+		closeDB(db);
+	});
+
+	ipcMain.on('get-creations-from-db', (event) => {
+		const db = getDB();
+		db.all('SELECT * FROM creations', [], (err, rows) => {
+			if (err) {
+				throw err;
+			}
+			event.reply('get-creations-from-db-reply', rows);
+		});
+		closeDB(db);
+	});
+
+	ipcMain.on('get-orders-with-creations', async (event) => {
+		const orders = await getOrdersWithCreations();
+		event.reply('get-orders-with-creations-reply', orders);
 	});
 };
 
