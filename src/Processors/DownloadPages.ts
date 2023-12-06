@@ -30,15 +30,15 @@ export async function fetchDownloadPage (selectedOrderRowsData: any): Promise<vo
 					.forEach((button) => {
 						let creationName = button.href.split('creation=')[1];
 						if (creationName == null) {
-							console.log('no creation name found faking it with ##UNKNOWNCREATOR##');
-							creationName = '##UNKNOWNCREATOR##';
+							console.log('no creation name found, faking it with ##UNKNOWNCREATION##');
+							console.log('we will need to figure out how to connect this later')
+							creationName = '##UNKNOWNCREATION##';
 						}
 						if (downloadLinks[creationName] == null) {
 							downloadLinks[creationName] = [];
 						}
 						downloadLinks[creationName].push(button.href.replace('file://', BASE_URL));
-					}
-					);
+					});
 
 				console.log(downloadLinks);
 
@@ -49,24 +49,20 @@ export async function fetchDownloadPage (selectedOrderRowsData: any): Promise<vo
 				resolve(orderInfo);
 			});
 		}).then((orderInfo) => {
+			if (orderInfo == null) {
+				console.log('orderInfo is null');
+				return;
+			}
 			console.log('orderInfo', orderInfo);
-			Object.entries(orderInfo.downloadLinks).forEach((downloadLink) => {
-				console.log('downloadLinkGroups', downloadLink);
-				downloadLink.forEach((linksArray) => {
-					console.log('linksArray', linksArray);
-					if (Array.isArray(linksArray)) {
-						console.log('linksArray is an array');
-						linksArray.forEach((link) => {
-							console.log('link', link);
-							if (link.includes('https://cults3d.com/')) {
-								console.log('sending download-file', link);
-								ipcRenderer.send('download-file', link);
-							} else {
-								console.log('not sending download-file', link);
-							}
-						});
-					}
-				});
+			const downloadLinksArray = Object.entries(orderInfo.downloadLinks).map(([creationName, linksArray]) => {
+				if (Array.isArray(linksArray)) {
+					linksArray.forEach((link) => {
+						if (link.includes('https://cults3d.com/')) {
+							ipcRenderer.send('download-file', link);
+						}
+					});
+				}
+				return { creationName, linksArray };
 			});
 			ipcRenderer.send('add-order-download-links-to-orders-json-file', orderInfo);
 		});
