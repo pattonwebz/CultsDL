@@ -1,5 +1,5 @@
 // main.js
-const { app, BrowserWindow, ipcMain, Menu } = require('electron');
+const { app, BrowserWindow, ipcMain } = require('electron');
 const { getSessionToken } = require('./Server/userDataStore');
 
 const { join } = require('path');
@@ -12,9 +12,9 @@ let cookieSet = false;
 
 let win;
 
-function getWin () {
+const getWin = () => {
 	return win;
-}
+};
 
 function createWindow () {
 	win = new BrowserWindow({
@@ -36,6 +36,10 @@ function createWindow () {
 
 	ipcMain.on('trySetCookie', () => {
 		trySetCookie();
+	});
+
+	ipcMain.handle('getWin', () => {
+		return getWin();
 	});
 }
 function trySetCookie () {
@@ -76,4 +80,7 @@ app.whenReady().then(() => {
 	setupIpcHandlers();
 });
 
-module.exports = { getWin, trySetCookie };
+module.exports = {
+	getWin,
+	createWindow
+};

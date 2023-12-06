@@ -1,31 +1,21 @@
-const { getWin, trySetCookie } = require('./main');
-const { session, ipcMain } = require('electron');
+const { session } = require('electron');
 const { getUserData } = require('./userDataStore');
-const { CONSTANTS } = require('./Server/constants');
+const { CONSTANTS } = require('./constants');
 const { DOWNLOAD_DIR } = CONSTANTS;
 
 const { existsSync, mkdirSync } = require('fs');
+const ipcRenderer = require('electron').ipcRenderer;
 
-const win = getWin();
+const win = ipcMain.invoke('getWin');
 const downloadQueue = [];
 let isDownloading = false;
 
-win.webContents.on('did-finish-load', () => {
-	// const sessionToken = getUserData('sessionToken');
-	// win.webContents.send('sessionToken', sessionToken);
-	// const downloadDir = getUserData('downloadDirectory');
-	// win.webContents.send('downloadDirectory', downloadDir);
-
-	trySetCookie();
-
-	ipcMain.on('download-file', (event, url) => {
-		console.log('downlad-file', url);
-		downloadQueue.push(url);
-		if (!isDownloading) {
-			startNextDownload();
-		}
-	});
-});
+function downloadFile (url) {
+	downloadQueue.push(url);
+	if (!isDownloading) {
+		startNextDownload();
+	}
+}
 
 function startNextDownload () {
 	if (downloadQueue.length > 0) {
@@ -42,7 +32,7 @@ function startNextDownload () {
 }
 
 session.defaultSession.on('will-download', (event, downloadItem, webContents) => {
-	trySetCookie();
+	ipcRenderer.send('trySetCookie');
 	console.log('will-download', downloadItem.getFilename());
 	// Set the save path, making Electron not to prompt a save dialog.
 	const userSavedDownloadDirectory = getUserData('downloadDirectory');
@@ -89,3 +79,5 @@ session.defaultSession.on('will-download', (event, downloadItem, webContents) =>
 		startNextDownload();
 	});
 });
+
+module.exports = { downloadFile };
