@@ -7,7 +7,7 @@ const { setupIpcHandlers } = require('./Server/ipcHandlers');
 
 const { session } = require('electron');
 const { existsSync, mkdirSync } = require('fs');
-const createDataDirectories = require('./Server/initialSetup');
+const { createDataDirectories, maybeCreateDb } = require('./Server/initialSetup');
 
 const { CONSTANTS } = require('./Server/constants');
 const { DOWNLOAD_DIR } = CONSTANTS;
@@ -155,5 +155,6 @@ app.whenReady().then(() => {
 	trySetCookie();
 	createWindow();
 	createDataDirectories();
+	maybeCreateDb();
 	setupIpcHandlers();
 });
