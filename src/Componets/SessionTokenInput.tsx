@@ -25,7 +25,7 @@ const SessionTokenInput: React.FC = () => {
 	};
 
 	useEffect(() => {
-		saveSessionToken(getSessionToken());
+		saveSessionToken(sessionToken);
 	}, [sessionToken]);
 
 	return (
@@ -38,7 +38,6 @@ const SessionTokenInput: React.FC = () => {
 					variant="outlined"
 					type="text"
 					value={sessionToken}
-					onChange={(e) => { setSessionToken(e.target.value); }}
 					placeholder="Enter session token"
 					label="Session Token"
 				/>
