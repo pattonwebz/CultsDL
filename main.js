@@ -1,12 +1,11 @@
 // main.js
 const { app, BrowserWindow, ipcMain, Menu } = require('electron');
-const { getSessionToken, getUserData } = require('./Server/userDataStore');
+const { getSessionToken } = require('./Server/userDataStore');
 
 const { join } = require('path');
 const { setupIpcHandlers } = require('./Server/ipcHandlers');
 
 const { session } = require('electron');
-const { existsSync, mkdirSync } = require('fs');
 const { createDataDirectories, maybeCreateDb } = require('./Server/initialSetup');
 
 let cookieSet = false;
