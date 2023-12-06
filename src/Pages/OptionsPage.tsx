@@ -7,9 +7,9 @@ import { useUserData } from '../Contexts/UserDataContext';
 
 const OptionsPage: React.FC = () => {
 
-	const {downloadDirectory, saveDownloadDirectory} = useUserData();
+	const {getDownloadDirectory, saveDownloadDirectory} = useUserData();
 	const [value, setValue] = React.useState('');
-	const [directoryPath, setDirectoryPath] = React.useState(downloadDirectory);
+	const [directoryPath, setDirectoryPath] = React.useState(getDownloadDirectory);
 
 	const handleChange = (fileInputChange: React.ChangeEvent<HTMLInputElement>): void => {
 		// Check if fileInputChange and its properties exist
@@ -32,7 +32,7 @@ const OptionsPage: React.FC = () => {
 	};
 
 	const handleRemovingDirectory = (): void => {
-		setDirectoryPath('');
+		setDirectoryPath('');;
 	};
 
 	useEffect(() => {
@@ -53,7 +53,7 @@ const OptionsPage: React.FC = () => {
 				<Divider/>
 			</Box>
 			<Typography>
-				The directory to save the files to: <code>{downloadDirectory}</code>
+				The directory to save the files to: <code>{directoryPath}</code>
 			</Typography>
 			<Button variant="contained" onClick={handleRemovingDirectory}>
 				Clear directory and use default in home path
