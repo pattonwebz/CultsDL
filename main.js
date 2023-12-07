@@ -17,6 +17,8 @@ let cookieSet = false;
 const downloadQueue = [];
 let isDownloading = false;
 
+let currentDownload = null;
+
 let win;
 
 const getWin = () => {
@@ -78,6 +80,8 @@ function createWindow () {
 		if (downloadQueue.length > 0) {
 			const downloadData = downloadQueue.shift();
 			isDownloading = true;
+			ipcMain.emit('current-download', downloadData);
+			currentDownload = downloadData;
 			win.webContents.downloadURL(downloadData.link);
 		} else {
 			win.webContents.send('download-progress', {
@@ -108,6 +112,13 @@ function createWindow () {
 		const filePath = downloadsDir + '/' + downloadItem.getFilename();
 
 		downloadItem.setSavePath(filePath);
+
+		const downloadData = {
+			fileName: downloadItem.getFilename(),
+			size: downloadItem.getTotalBytes(),
+			path: downloadItem.getSavePath()
+		};
+		ipcMain.emit('download-started', downloadData);
 
 		downloadItem.on('updated', (event, state) => {
 			if (state === 'interrupted') {

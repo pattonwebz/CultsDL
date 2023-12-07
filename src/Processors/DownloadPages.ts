@@ -7,9 +7,10 @@ export async function fetchDownloadPage (selectedOrderRowsData: any): Promise<vo
 	for (const orderRowData of selectedOrderRowsData) {
 		console.log('fetching download page for order', orderRowData.id);
 		console.log('fetching download page for order', orderRowData.link)
-		ipcRenderer.send('fetch-download-page', orderRowData.link, orderRowData.id);
+		console.log('fetching download page for order', orderRowData.creations)
+		ipcRenderer.send('fetch-download-page', orderRowData.link, orderRowData.id, orderRowData.creations);
 		await new Promise(resolve => {
-			ipcRenderer.on('fetch-download-page-reply', (_, html, orderId) => {
+			ipcRenderer.on('fetch-download-page-reply', (_, html, orderId, creations) => {
 				const parser = new DOMParser();
 				const doc = parser.parseFromString(html, 'text/html');
 
@@ -46,11 +47,25 @@ export async function fetchDownloadPage (selectedOrderRowsData: any): Promise<vo
 							downloadLinks[creationName] = [];
 						}
 						downloadLinks[creationName].push(button.href.replace('file://', BASE_URL));
+						function stringToSlug(str) {
+							return str.toLowerCase().replace(/ - /g, ' ').replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+						}
+						creations.forEach((creation) => {
+							console.log('creation', creation);
+							console.log(stringToSlug(creation.name));
+							if (stringToSlug(creation.name) === creationName) {
+								console.log('matched slug', creationName, stringToSlug(creation.name), creation.name);
+								downloadLinks[creationName].creationId = creation.id;
+							} else {
+								console.log('did not match slug', creationName, stringToSlug(creation.name), creation.name);
+							}
+						});
 					});
 
 				console.log(downloadLinks);
 
 				const orderInfo = {
+					creations,
 					orderId: orderId,
 					downloadLinks
 				};
@@ -73,7 +88,7 @@ export async function fetchDownloadPage (selectedOrderRowsData: any): Promise<vo
 							console.log('link includes https://cults3d.com/');
 
 							const downloadFileData = {
-								order: orderInfo?.orderId ?? null,
+								orderId: orderInfo?.orderId ?? null,
 								creationName,
 								link
 							};

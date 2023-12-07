@@ -98,8 +98,8 @@ const setupIpcHandlers = () => {
 		event.reply('get-orders-from-file-reply', orders);
 	});
 
-	ipcMain.on('fetch-download-page', async (event, url = '', orderNumber = '') => {
-		getDownloadPages(url, orderNumber);
+	ipcMain.on('fetch-download-page', async (event, url = '', orderNumber = '', creations = []) => {
+		getDownloadPages(url, orderNumber, creations);
 	});
 
 	// get the order from database with the orderNumber matching the item id
@@ -118,13 +118,12 @@ const setupIpcHandlers = () => {
 
 	ipcMain.handle('get-creations-by-order-id', async (event, orderId) => {
 		console.log('get-creations-by-order-id', orderId);
-		const creations = await getCreationsByOrderId(orderId);
-		return creations;
+		return await getCreationsByOrderId(orderId);
 	});
 
 	ipcMain.handle('get-creations-by-order-number', async (event, orderNumber) => {
 		console.log('get-creations-by-order-number', orderNumber);
-		const creations = await getCreationsByOrderNumber(orderNumber);
+		return await getCreationsByOrderNumber(orderNumber);
 	});
 
 	ipcMain.on('get-orders-from-db', (event) => {
@@ -187,6 +186,13 @@ const setupIpcHandlers = () => {
 				console.log('Row does not exist:', row);
 			}
 		});
+
+		closeDB(db);
+	});
+
+	ipcMain.on('save-files-data', async (event, data) => {
+		const db = getDB();
+
 
 		closeDB(db);
 	});
