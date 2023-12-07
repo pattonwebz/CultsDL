@@ -3,7 +3,7 @@ import { BASE_URL } from '../Constants';
 import { type Order, type Creation } from '../Types/interfaces';
 
 export function processOrdersReply (html: string, setNextPage: (nextPage: string) => void): Order[] {
-	console.log('fetch-download-page-reply');
+	
 	const parser = new DOMParser();
 	const doc = parser.parseFromString(html, 'text/html');
 	const nextPageElement = doc.querySelector('.pagination .paginate.next a');
@@ -17,12 +17,12 @@ export function processOrdersReply (html: string, setNextPage: (nextPage: string
 	doc.querySelectorAll('#content table tbody tr').forEach((row) => {
 		const cells = row.querySelectorAll<HTMLTableCellElement>('td');
 		if (cells.length < 5) {
-			console.log('not enough cells in row');
+			
 			return;
 		}
 		// check if cells[0] through cells[4] are valid
 		if ((cells[0] == null) || (cells[1] == null) || (cells[3] == null) || (cells[4] == null)) {
-			console.log('one of the cells is null');
+			
 			return;
 		}
 
@@ -87,8 +87,8 @@ export function processOrdersReply (html: string, setNextPage: (nextPage: string
 			}
 		});
 
-		// console.log(creations);
-		console.log(creations.length);
+		// 
+		
 		order.creations = creations;
 		newOrders.push(order);
 	});

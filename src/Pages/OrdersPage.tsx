@@ -47,9 +47,9 @@ const OrdersPage: React.FC = () => {
 		});
 
 		ipcRenderer.on('fetch-creation-page-reply', async (_, creationInfo) => {
-			console.log('creationInfo', creationInfo);
+			
 			const {html, id} = creationInfo;
-			console.log('creation page descrupct', html, id)
+			
 			const creationData = await creationPageProcessor(html, id);
 			ipcRenderer.send('save-creation-data', creationData);
 		});
@@ -69,7 +69,7 @@ const OrdersPage: React.FC = () => {
 		if (nextPage !== '') {
 			ipcRenderer.send('fetch-orders', nextPage);
 		} else {
-			console.log('done parsing orders');
+			
 			setIsFetchingOrders(false);
 			ipcRenderer.send('all-order-pages-parsed', orders);
 		}
@@ -82,22 +82,22 @@ const OrdersPage: React.FC = () => {
 	useEffect(() => {
 		ipcRenderer.send('get-orders-from-db');
 		ipcRenderer.on('get-orders-from-db-reply', (_, orders) => {
-			console.log('got orders from db');
-			console.log(orders);
+			
+			
 			setDbOrders(orders);
 		});
 
 		ipcRenderer.send('get-creations-from-db');
 		ipcRenderer.on('get-creations-from-db-reply', (_, creations) => {
-			console.log('got creations from db');
-			console.log(creations);
+			
+			
 			setDbCreations(creations);
 		});
 
 		ipcRenderer.send('get-orders-with-creations');
 		ipcRenderer.on('get-orders-with-creations-reply', (_, ordersAndCreations) => {
-			console.log('got orders with creations from db');
-			console.log(ordersAndCreations);
+			
+			
 			const processedOrders = ordersAndCreations.map((orderAndCreation) => {
 				return {
 					id: orderAndCreation.id,
@@ -109,7 +109,7 @@ const OrdersPage: React.FC = () => {
 					link: orderAndCreation.link
 				}
 			});
-			console.log(processedOrders);
+			
 			setOrdersWithCreations(processedOrders);
 
 		});
@@ -120,8 +120,7 @@ const OrdersPage: React.FC = () => {
 		const selectedOrderRowsData = ordersWithCreations.filter((row) => {
 			return selectedOrderRows.includes(row.id);
 		});
-		console.log('selectedOrderRowsData', selectedOrderRowsData);
-		console.log(await ipcRenderer.invoke('get-order-by-id', selectedOrderRowsData[0].id));
+
 		await fetchDownloadPage(selectedOrderRowsData).then(() => {
 			setIsFetchingDownloadPages(false);
 		});
@@ -131,10 +130,10 @@ const OrdersPage: React.FC = () => {
 		const selectedOrderRowsData = ordersWithCreations.filter((row) => {
 			return selectedOrderRows.includes(row.id);
 		});
-		console.log('selectedOrderRowsforCreations', selectedOrderRowsData);
+		
 		selectedOrderRowsData.forEach((order) => {
 			order.creations.forEach((creation) => {
-				console.log('creation for extra info', creation);
+				
 				const id = creation.id;
 				const link = creation.link;
 

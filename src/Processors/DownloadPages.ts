@@ -5,8 +5,8 @@ const ipcRenderer = window.electron.ipcRenderer;
 
 export async function fetchDownloadPage (selectedOrderRowsData: any): Promise<void> {
 	for (const orderRowData of selectedOrderRowsData) {
-		console.log('fetching download page for order', orderRowData.id);
-		console.log('fetching download page for order', orderRowData.link)
+		
+		
 		ipcRenderer.send('fetch-download-page', orderRowData.link, orderRowData.id);
 		await new Promise(resolve => {
 			ipcRenderer.on('fetch-download-page-reply', (_, html, orderId) => {
@@ -15,19 +15,21 @@ export async function fetchDownloadPage (selectedOrderRowsData: any): Promise<vo
 
 				const loggedIn = doc.querySelector('.nav__action-login > details > summary > img[title="Manage my profile"]') != null;
 				if (!loggedIn) {
-					console.log('not logged in');
+					console.error('not logged in');
 					resolve(null);
 					return;
 				}
 				const downloadButtonsContainer = doc.querySelector('#content > .grid > .grid-cell:not(.grid-cell--fit)');
 				if (downloadButtonsContainer == null) {
-					console.log('no download buttons container found');
+					
+					console.error('no download buttons container found');
 					resolve(null);
 					return;
 				}
 				const downloadButtons: NodeListOf<HTMLAnchorElement> = downloadButtonsContainer.querySelectorAll('a.btn');
 				if (downloadButtons.length < 1) {
-					console.log('no download buttons found');
+					
+					console.error('no download buttons found');
 					resolve(null);
 					return;
 				}
@@ -48,7 +50,7 @@ export async function fetchDownloadPage (selectedOrderRowsData: any): Promise<vo
 						downloadLinks[creationName].push(button.href.replace('file://', BASE_URL));
 					});
 
-				console.log(downloadLinks);
+				
 
 				const orderInfo = {
 					orderId: orderId,
@@ -58,19 +60,19 @@ export async function fetchDownloadPage (selectedOrderRowsData: any): Promise<vo
 			});
 		}).then((orderInfo) => {
 			if (orderInfo == null) {
-				console.log('orderInfo is null');
+				
 				return;
 			}
-			console.log('orderInfo', orderInfo);
+			
 			const downloadLinksArray = Object.entries(orderInfo.downloadLinks).map(([creationName, linksArray]) => {
-				console.log(creationName, linksArray);
+				
 				if (Array.isArray(linksArray)) {
-					console.log('linksArray is an array');
-					console.log(linksArray);
+					
+					
 					linksArray.forEach((link) => {
-						console.log('link', link)
+						
 						if (link.includes('https://cults3d.com/')) {
-							console.log('link includes https://cults3d.com/');
+							
 
 							const downloadFileData = {
 								order: orderInfo?.orderId ?? null,
