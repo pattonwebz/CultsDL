@@ -15,7 +15,7 @@ const { getDB, closeDB } = require('./database/getDB');
 const allOrderPagesParsed = require('./database/allOrderPagesParsed');
 const getOrdersWithCreations = require('./database/getOrdersWithCreations');
 const { getOrderById } = require('./database/getOrderByX');
-const { getCreationsByOrderId } = require('./database/getCreationByX');
+const { getCreationsByOrderId, getCreationsByOrderNumber } = require('./database/getCreationByX');
 const getCreationPage = require('./fetchCreationExtraData');
 
 const setupIpcHandlers = () => {
@@ -118,7 +118,7 @@ const setupIpcHandlers = () => {
 
 	ipcMain.handle('get-creations-by-order-id', async (event, orderId) => {
 		console.log('get-creations-by-order-id', orderId);
-		const creations = await getCreationsbyOrderId(orderId);
+		const creations = await getCreationsByOrderId(orderId);
 		return creations;
 	});
 

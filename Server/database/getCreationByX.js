@@ -22,4 +22,8 @@ const getCreationsByOrderId = async (orderId, limit = 500) => {
 	return getCreationsByX('order_id', orderId, limit);
 };
 
-module.exports = { getCreationsByX, getCreationsById, getCreationById, getCreationsByOrderId };
+const getCreationsByOrderNumber = async (orderNumber) => {
+	return getCreationsByX('order_number', orderNumber);
+};
+
+module.exports = { getCreationsByX, getCreationsById, getCreationById, getCreationsByOrderId, getCreationsByOrderNumber };
