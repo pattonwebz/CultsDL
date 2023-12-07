@@ -15,7 +15,7 @@ const { getDB, closeDB } = require('./database/getDB');
 const allOrderPagesParsed = require('./database/allOrderPagesParsed');
 const getOrdersWithCreations = require('./database/getOrdersWithCreations');
 const { getOrderById } = require('./database/getOrderByX');
-const { getCreationsByOrderId } = require('./database/getCreationByX');
+const { getCreationsByOrderId, getCreationsByOrderNumber } = require('./database/getCreationByX');
 const getCreationPage = require('./fetchCreationExtraData');
 
 const setupIpcHandlers = () => {
@@ -96,8 +96,8 @@ const setupIpcHandlers = () => {
 		event.reply('get-orders-from-file-reply', orders);
 	});
 
-	ipcMain.on('fetch-download-page', async (event, url = '', orderNumber = '') => {
-		getDownloadPages(url, orderNumber);
+	ipcMain.on('fetch-download-page', async (event, url = '', orderNumber = '', creations = []) => {
+		getDownloadPages(url, orderNumber, creations);
 	});
 
 	// get the order from database with the orderNumber matching the item id
@@ -110,12 +110,13 @@ const setupIpcHandlers = () => {
 	});
 
 	ipcMain.handle('get-creations-by-order-id', async (event, orderId) => {
-		const creations = await getCreationsbyOrderId(orderId);
-		return creations;
+		console.log('get-creations-by-order-id', orderId);
+		return await getCreationsByOrderId(orderId);
 	});
 
 	ipcMain.handle('get-creations-by-order-number', async (event, orderNumber) => {
-		const creations = await getCreationsByOrderNumber(orderNumber);
+		console.log('get-creations-by-order-number', orderNumber);
+		return await getCreationsByOrderNumber(orderNumber);
 	});
 
 	ipcMain.on('get-orders-from-db', (event) => {
@@ -177,6 +178,13 @@ const setupIpcHandlers = () => {
 				console.log('Row does not exist:', row);
 			}
 		});
+
+		closeDB(db);
+	});
+
+	ipcMain.on('save-files-data', async (event, data) => {
+		const db = getDB();
+
 
 		closeDB(db);
 	});

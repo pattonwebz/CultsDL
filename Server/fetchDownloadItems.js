@@ -3,7 +3,7 @@ const { net, BrowserWindow } = require('electron');
 const cache = require('./cache');
 const { getSessionToken } = require('./userDataStore');
 
-const getDownloadPages = (url = '', orderNumber) => {
+const getDownloadPages = (url = '', orderNumber, creations) => {
 	const pageToRequest = url;
 
 	if (pageToRequest === '') {
@@ -14,7 +14,7 @@ const getDownloadPages = (url = '', orderNumber) => {
 	const data = cache.getSync(pageToRequest);
 	if (data) {
 		console.log('Loaded data from cache');
-		BrowserWindow.getFocusedWindow().webContents.send('fetch-download-page-reply', data, orderNumber);
+		BrowserWindow.getFocusedWindow().webContents.send('fetch-download-page-reply', data, orderNumber, creations);
 		return;
 	}
 

@@ -74,7 +74,7 @@ const createDatabase = (db) => {
 			downloaded INTEGER NOT NULL DEFAULT 0,
 			creation_id INTEGER NOT NULL,
 			order_id INTEGER NOT NULL,
-			FOREIGN KEY(creation_id) REFERENCES creations(id)
+			FOREIGN KEY(creation_id) REFERENCES creations(id),
     		FOREIGN KEY(order_id) REFERENCES orders(id)
 		)`, (err) => {
 			if (err) {
