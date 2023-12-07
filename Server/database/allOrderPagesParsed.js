@@ -14,7 +14,7 @@ const allOrderPagesParsed = (orders) => {
 						return console.error(err.message);
 					}
 					const orderId = this.lastID;
-					console.log(`A row has been inserted with rowid ${this.lastID}`);
+
 					for (const creation of order.creations) {
 						db.run('INSERT INTO creations(name, thumbnail, link, creator, order_id, order_number) VALUES(?, ?, ?, ?, ?, ?)', [creation.title, creation.thumbnail, creation.link, creation.creator, orderId, order.number], function (err) {
 							if (err) {

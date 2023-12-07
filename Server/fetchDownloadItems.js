@@ -16,8 +16,6 @@ const getDownloadPages = (url = '', orderNumber) => {
 		console.log('Loaded data from cache');
 		BrowserWindow.getFocusedWindow().webContents.send('fetch-download-page-reply', data, orderNumber);
 		return;
-	} else {
-		console.log('No data in cache');
 	}
 
 	const request = net.request({

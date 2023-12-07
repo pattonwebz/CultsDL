@@ -38,7 +38,7 @@ function createWindow () {
 
 	win.loadFile('index.html')
 		.then(() => {
-			console.log('index.html loaded');
+
 		});
 
 	ipcMain.on('trySetCookie', () => {
@@ -97,14 +97,10 @@ function createWindow () {
 		const userSavedDownloadDirectory = getUserData('downloadDirectory');
 		const downloadsDir = userSavedDownloadDirectory !== '' ? userSavedDownloadDirectory : DOWNLOAD_DIR;
 
-		console.log('downloadsDir', downloadsDir);
-
 		if (!existsSync(downloadsDir)) {
-			console.log('creating downloads dir');
 			mkdirSync(downloadsDir);
 		}
 
-		console.log('downloadsDir', downloadsDir);
 		const filePath = downloadsDir + '/' + downloadItem.getFilename();
 
 		downloadItem.setSavePath(filePath);
@@ -148,7 +144,6 @@ function trySetCookie () {
 	}
 
 	if (cookieSet) {
-		console.log('cookie already set');
 		return;
 	}
 
@@ -157,11 +152,9 @@ function trySetCookie () {
 	// I don't know how to handle cookie expiry, so I just remove it and set it again
 	session.defaultSession.cookies.remove(cookie.url, cookie.name)
 		.then(() => {
-			console.log('Cookie removed successfully');
 			session.defaultSession.cookies.set(cookie)
 				.then(() => {
 					cookieSet = true;
-					console.log('Cookie set successfully');
 				}, (error) => {
 					console.error('Failed to set cookie:', error);
 				});

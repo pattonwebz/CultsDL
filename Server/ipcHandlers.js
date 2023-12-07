@@ -24,7 +24,6 @@ const setupIpcHandlers = () => {
 	});
 
 	ipcMain.on('requestUserData', (event) => {
-		console.log('requestUserData');
 		event.reply('userData-reply', getUserData());
 	});
 
@@ -37,7 +36,6 @@ const setupIpcHandlers = () => {
 	});
 
 	ipcMain.on('fetch-orders', async (event, url = '') => {
-		// console.log(url);
 		getOrders(url);
 	});
 
@@ -104,26 +102,19 @@ const setupIpcHandlers = () => {
 
 	// get the order from database with the orderNumber matching the item id
 	ipcMain.handle('get-order-by-id', async (event, itemId) => {
-		console.log('\n\n\n\n\n\n\n\n');
-		console.log('get-order-by-id', itemId);
 		const order = await getOrderById(itemId);
-		console.log(order);
 
 		const creations = await getCreationsByOrderId(order.id);
 
-		console.log('\n\n\n\n\n\n\n\n');
-		console.log('creations:', creations);
 		return order;
 	});
 
 	ipcMain.handle('get-creations-by-order-id', async (event, orderId) => {
-		console.log('get-creations-by-order-id', orderId);
 		const creations = await getCreationsbyOrderId(orderId);
 		return creations;
 	});
 
 	ipcMain.handle('get-creations-by-order-number', async (event, orderNumber) => {
-		console.log('get-creations-by-order-number', orderNumber);
 		const creations = await getCreationsByOrderNumber(orderNumber);
 	});
 
@@ -155,9 +146,8 @@ const setupIpcHandlers = () => {
 	});
 
 	ipcMain.on('fetch-creation-page', async (event, creationInfo) => {
-		console.log('fetch-creation-page', creationInfo);
 		const { link, id } = creationInfo;
-		console.log('destructured', link, id);
+
 		getCreationPage(link, id);
 	});
 

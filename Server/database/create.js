@@ -12,10 +12,8 @@ const checkIfTableExists = (db, tableName) => {
 				reject(err);
 			}
 			if (row) {
-				console.log(`Table ${tableName} exists.`);
 				resolve(true);
 			} else {
-				console.log(`Table ${tableName} does not exist.`);
 				resolve(false);
 			}
 		});
@@ -105,7 +103,6 @@ const createDatabase = (db) => {
 		if (err) {
 			console.error(err.message);
 		}
-		console.log('Close the database connection.');
 	});
 };
 

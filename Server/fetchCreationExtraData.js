@@ -7,12 +7,12 @@ const getCreationPage = (url = '', id) => {
 	const pageToRequest = url;
 
 	if (!pageToRequest || !id) {
-		console.log('No page to request');
+		console.error('No page to request');
 		return;
 	}
 
 	if (!pageToRequest.includes('https://cults3d.com')) {
-		console.log('Invalid page to request, maybe this is private??');
+		console.error('Invalid page to request, maybe this is private??');
 		return;
 	}
 
@@ -20,7 +20,6 @@ const getCreationPage = (url = '', id) => {
 	const htmlFromCache = cache.getSync(pageToRequest);
 	if (htmlFromCache) {
 		console.log('Loaded data from cache');
-		// console.log(data);
 		const data = {
 			html: htmlFromCache,
 			id
