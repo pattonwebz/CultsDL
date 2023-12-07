@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, {createContext, useState, useContext, useEffect, PropsWithChildren} from 'react';
 
 const ipcRenderer = window.electron.ipcRenderer;
 
@@ -32,6 +32,7 @@ const UserDataProvider: React.FC<PropsWithChildren<any>> = ({ children }) => {
 
 	// Function to set the session token
 	const saveSessionToken = (token): void => {
+		console.log('saveSessionToken in datacontext', token)
 		setSessionToken(token);
 		ipcRenderer.send('saveSessionToken', token);
 	};

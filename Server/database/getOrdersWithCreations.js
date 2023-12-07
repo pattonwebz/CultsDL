@@ -25,7 +25,7 @@ const getOrdersWithCreations = async () => {
 
 	// Add creations to their respective orders
 	orders = orders.map(order => {
-		order.creations = creations.filter(creation => creation.creation_order_id === order.id);
+		order.creations = creations.filter(creation => creation.order_id === order.id);
 		return order;
 	});
 

@@ -9,7 +9,7 @@ const allowedTables = ['orders', 'creations', 'files'];
  * @param {string|number|blob} value - the value to query
  * @param {number} limit - the limit of the query - default 500
  */
-const getRowsByColumnWhereValue = async (table = 'orders', column = 'order_number', value = 0, limit = 500) => {
+const getRowsByColumnWhereValue = async (table = 'orders', column = 'number', value = 0, limit = 500) => {
 	console.log('getRowsByColumnWhereValue: ', table, column, value);
 	console.log(allowedTables.includes(table));
 	if (!allowedTables.includes(table) || !column || value === 0) {

@@ -13,6 +13,11 @@ export interface Creation {
     creator: string
 }
 
+export interface CrationWithData extends Creation {
+    description: string
+    tags: string[]
+}
+
 export interface OrdersTableProps {
 	rows: any[];
 }

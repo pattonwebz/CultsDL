@@ -1,6 +1,6 @@
 const { getRowsByColumnWhereValue } = require('./getRowInColumnByValue');
 
-const getOrdersByX = async (column = 'order_number', value = 0, limit = 500) => {
+const getOrdersByX = async (column = 'number', value = 0, limit = 500) => {
 	if (!column || !value) {
 		return null;
 	}
@@ -19,7 +19,7 @@ const getOrderById = async (id) => {
 };
 
 const getOrderByOrderNumber = async (orderNumber) => {
-	return getOrdersByX('order_number', orderNumber, 1);
+	return getOrdersByX('number', orderNumber, 1);
 };
 
 module.exports = { getOrdersByX, getOrdersById, getOrderById };

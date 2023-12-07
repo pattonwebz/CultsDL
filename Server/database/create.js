@@ -5,22 +5,25 @@ const CreationStatus = {
 };
 
 const checkIfTableExists = (db, tableName) => {
-	db.get('SELECT name FROM sqlite_master WHERE type=\'table\' AND name=?', [tableName], (err, row) => {
-		if (err) {
-			console.error(err.message);
-			throw err;
-		}
-		if (row) {
-			console.log(`Table ${tableName} exists.`);
-			return true;
-		}
-		console.log(`Table ${tableName} does not exist.`);
-		return false;
+	return new Promise((resolve, reject) => {
+		db.get('SELECT name FROM sqlite_master WHERE type=\'table\' AND name=?', [tableName], (err, row) => {
+			if (err) {
+				console.error(err.message);
+				reject(err);
+			}
+			if (row) {
+				console.log(`Table ${tableName} exists.`);
+				resolve(true);
+			} else {
+				console.log(`Table ${tableName} does not exist.`);
+				resolve(false);
+			}
+		});
 	});
 };
 
-const maybeCreateDatabase = (db) => {
-	if (!checkIfTableExists(db, 'orders')) {
+const maybeCreateDatabase = async (db) => {
+	if (!await checkIfTableExists(db, 'orders')) {
 		createDatabase(db);
 	}
 };
@@ -30,12 +33,12 @@ const createDatabase = (db) => {
 		// Create 'orders' table
 		db.run(`CREATE TABLE IF NOT EXISTS orders (
 			id INTEGER PRIMARY KEY,
-			order_number INTEGER NOT NULL,
-			order_date TEXT NOT NULL,
-			order_status TEXT NOT NULL DEFAULT '',
-			order_total TEXT NOT NULL DEFAULT '',
-			order_link TEXT NOT NULL DEFAULT '',
-			order_downloaded INTEGER NOT NULL DEFAULT 0
+			number INTEGER NOT NULL,
+			date TEXT NOT NULL,
+			status TEXT NOT NULL DEFAULT '',
+			price TEXT NOT NULL DEFAULT '',
+			link TEXT NOT NULL DEFAULT '',
+			downloaded_all_creations INTEGER NOT NULL DEFAULT 0
 		  )`, (err) => {
 			if (err) {
 				console.error(err.message);
@@ -46,17 +49,18 @@ const createDatabase = (db) => {
 		// Create 'creations' table
 		db.run(`CREATE TABLE IF NOT EXISTS creations (
 			id INTEGER PRIMARY KEY,
-			creation_name TEXT NOT NULL DEFAULT '',
-			creation_link TEXT NOT NULL DEFAULT '',
-			creation_thumbnail TEXT NOT NULL DEFAULT '',
-			creation_downloaded INTEGER NOT NULL DEFAULT 0,
-			creation_creator TEXT NOT NULL DEFAULT '',
-			creation_description TEXT NOT NULL DEFAULT '',
-			creation_tags BLOB NOT NULL DEFAULT '[]',
-			creation_status TEXT NOT NULL DEFAULT '${CreationStatus.NO_DATA_FETCHED}' CHECK(creation_status IN ('${CreationStatus.NO_DATA_FETCHED}', '${CreationStatus.FILE_DATA_FETCHED}', '${CreationStatus.CREATION_DATA_FETCHED}')),
-			creation_unlisted INTEGER NOT NULL DEFAULT 0,
-		    creation_order_id INTEGER NOT NULL,
-			FOREIGN KEY(creation_order_id) REFERENCES orders(id)
+			name TEXT NOT NULL DEFAULT '',
+			link TEXT NOT NULL DEFAULT '',
+			thumbnail TEXT NOT NULL DEFAULT '',
+			downloaded_all_files INTEGER NOT NULL DEFAULT 0,
+			creator TEXT NOT NULL DEFAULT '',
+			description TEXT NOT NULL DEFAULT '',
+			tags BLOB NOT NULL DEFAULT '[]',
+			status TEXT NOT NULL DEFAULT '${CreationStatus.NO_DATA_FETCHED}' CHECK(status IN ('${CreationStatus.NO_DATA_FETCHED}', '${CreationStatus.FILE_DATA_FETCHED}', '${CreationStatus.CREATION_DATA_FETCHED}')),
+			unlisted INTEGER NOT NULL DEFAULT 0,
+		    order_id INTEGER NOT NULL,
+    		order_number INTEGER NOT NULL,
+			FOREIGN KEY(order_id) REFERENCES orders(id)
 		)`, (err) => {
 			if (err) {
 				console.error(err.message);
@@ -67,11 +71,13 @@ const createDatabase = (db) => {
 		// Create 'files' table
 		db.run(`CREATE TABLE IF NOT EXISTS files (
 			id INTEGER PRIMARY KEY,
-			file_name TEXT NOT NULL DEFAULT '',
-			file_url TEXT NOT NULL DEFAULT '',
-			file_downloaded INTEGER NOT NULL DEFAULT 0,
-			file_creation_id INTEGER NOT NULL,
-			FOREIGN KEY(file_creation_id) REFERENCES creations(id)
+			name TEXT NOT NULL DEFAULT '',
+			url TEXT NOT NULL DEFAULT '',
+			downloaded INTEGER NOT NULL DEFAULT 0,
+			creation_id INTEGER NOT NULL,
+			order_id INTEGER NOT NULL,
+			FOREIGN KEY(creation_id) REFERENCES creations(id)
+    		FOREIGN KEY(order_id) REFERENCES orders(id)
 		)`, (err) => {
 			if (err) {
 				console.error(err.message);
@@ -83,8 +89,8 @@ const createDatabase = (db) => {
 			BEFORE INSERT ON creations
 			BEGIN
 			  SELECT CASE
-				WHEN NEW.creation_status NOT IN ('${CreationStatus.NO_DATA_FETCHED}', '${CreationStatus.DATA_FETCHED_NOT_DOWNLOADED}', '${CreationStatus.DOWNLOADED}') THEN
-				RAISE (ABORT, 'Invalid creation_status')
+				WHEN NEW.status NOT IN ('${CreationStatus.NO_DATA_FETCHED}', '${CreationStatus.DATA_FETCHED_NOT_DOWNLOADED}', '${CreationStatus.DOWNLOADED}') THEN
+				RAISE (ABORT, 'Invalid status')
 			  END;
 			END;
 		`, (err) => {

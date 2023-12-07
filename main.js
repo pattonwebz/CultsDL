@@ -1,6 +1,6 @@
 // main.js
 const { app, BrowserWindow, ipcMain } = require('electron');
-const { getSessionToken, getUserData} = require('./Server/userDataStore');
+const { getSessionToken, getUserData } = require('./Server/userDataStore');
 
 const { join } = require('path');
 const { existsSync, mkdirSync } = require('fs');
@@ -65,9 +65,9 @@ function createWindow () {
 
 		trySetCookie();
 
-		ipcMain.on('download-file', (event, url) => {
-			console.log('downlad-file', url);
-			downloadQueue.push(url);
+		ipcMain.on('download-file', (event, data) => {
+			console.log('download-file', data);
+			downloadQueue.push(data);
 			if (!isDownloading) {
 				startNextDownload();
 			}
@@ -76,9 +76,9 @@ function createWindow () {
 
 	function startNextDownload () {
 		if (downloadQueue.length > 0) {
-			const url = downloadQueue.shift();
+			const downloadData = downloadQueue.shift();
 			isDownloading = true;
-			win.webContents.downloadURL(url);
+			win.webContents.downloadURL(downloadData.link);
 		} else {
 			win.webContents.send('download-progress', {
 				totalInQueue: downloadQueue.length,

@@ -9,7 +9,7 @@ export async function fetchDownloadPage (selectedOrderRowsData: any): Promise<vo
 		console.log('fetching download page for order', orderRowData.link)
 		ipcRenderer.send('fetch-download-page', orderRowData.link, orderRowData.id);
 		await new Promise(resolve => {
-			ipcRenderer.on('fetch-download-page-reply', (_, html, number) => {
+			ipcRenderer.on('fetch-download-page-reply', (_, html, orderId) => {
 				const parser = new DOMParser();
 				const doc = parser.parseFromString(html, 'text/html');
 
@@ -51,7 +51,7 @@ export async function fetchDownloadPage (selectedOrderRowsData: any): Promise<vo
 				console.log(downloadLinks);
 
 				const orderInfo = {
-					orderNumber: number,
+					orderId: orderId,
 					downloadLinks
 				};
 				resolve(orderInfo);
@@ -63,16 +63,26 @@ export async function fetchDownloadPage (selectedOrderRowsData: any): Promise<vo
 			}
 			console.log('orderInfo', orderInfo);
 			const downloadLinksArray = Object.entries(orderInfo.downloadLinks).map(([creationName, linksArray]) => {
+				console.log(creationName, linksArray);
 				if (Array.isArray(linksArray)) {
+					console.log('linksArray is an array');
+					console.log(linksArray);
 					linksArray.forEach((link) => {
+						console.log('link', link)
 						if (link.includes('https://cults3d.com/')) {
-							ipcRenderer.send('download-file', link);
+							console.log('link includes https://cults3d.com/');
+
+							const downloadFileData = {
+								order: orderInfo?.orderId ?? null,
+								creationName,
+								link
+							};
+							ipcRenderer.send('download-file', downloadFileData);
 						}
 					});
 				}
 				return { creationName, linksArray };
 			});
-			ipcRenderer.send('add-order-download-links-to-orders-json-file', orderInfo);
 		});
 	}
 }

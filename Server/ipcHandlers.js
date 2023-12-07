@@ -14,8 +14,9 @@ const { DATA_DIR } = CONSTANTS;
 const { getDB, closeDB } = require('./database/getDB');
 const allOrderPagesParsed = require('./database/allOrderPagesParsed');
 const getOrdersWithCreations = require('./database/getOrdersWithCreations');
-const {getOrderById} = require("./database/getOrderByX");
-const {getCreationsByOrderId} = require("./database/getCreationByX");
+const { getOrderById } = require('./database/getOrderByX');
+const { getCreationsByOrderId } = require('./database/getCreationByX');
+const getCreationPage = require('./fetchCreationExtraData');
 
 const setupIpcHandlers = () => {
 	ipcMain.on('requestSessionToken', (event) => {
@@ -126,53 +127,6 @@ const setupIpcHandlers = () => {
 		const creations = await getCreationsByOrderNumber(orderNumber);
 	});
 
-	ipcMain.on('add-order-download-links-to-orders-json-file', async (event, data) => {
-		console.log(data);
-		const { orderNumber, downloadLinks } = data;
-
-		const orders = await getOrdersFromFile();
-		// console.log('orders: ', orders);
-		// loop through orders till we find the order with the matching order number
-		// console.log(event);
-		let order = null;
-		// do this with a foreach loop instead of a find loop
-		orders.forEach((o) => {
-			if (o.number === orderNumber) {
-				order = o;
-				// break out of the loop
-			}
-		});
-
-		if (!order) {
-			console.log('No matching order found for order: ', orderNumber);
-			return;
-		}
-
-		// loop through the creations to find the creation that has the link that matches a key in the downloadLinks object
-		let updatedOrder = false;
-
-		order.creations.forEach((creation) => {
-			// console.log(downloadLinks);
-			Object.keys(downloadLinks).forEach((key) => {
-				console.log(key);
-				console.log(creation.link);
-
-				if (creation.link.endsWith(key)) {
-					updatedOrder = true;
-					creation.downloadLinks = downloadLinks[key];
-				}
-			});
-		});
-		if (!updatedOrder) {
-			console.log('No matching creation found for order: ', orderNumber);
-			return;
-		}
-		// write the orders back to the file
-		writeFile(DATA_DIR + '/orders.json', JSON.stringify(orders, null, 2), (err) => {
-			if (err) throw err;
-		});
-	});
-
 	ipcMain.on('get-orders-from-db', (event) => {
 		const db = getDB();
 		db.all('SELECT * FROM orders', [], (err, rows) => {
@@ -198,6 +152,43 @@ const setupIpcHandlers = () => {
 	ipcMain.on('get-orders-with-creations', async (event) => {
 		const orders = await getOrdersWithCreations();
 		event.reply('get-orders-with-creations-reply', orders);
+	});
+
+	ipcMain.on('fetch-creation-page', async (event, creationInfo) => {
+		console.log('fetch-creation-page', creationInfo);
+		const { link, id } = creationInfo;
+		console.log('destructured', link, id);
+		getCreationPage(link, id);
+	});
+
+	ipcMain.on('save-creation-data', async (event, data) => {
+		const db = getDB();
+		const { description, tags, id } = data;
+
+		// Check if the row already exists
+		db.get('SELECT * FROM creations WHERE id = ?', [id], (err, row) => {
+			if (err) {
+				throw err;
+			}
+			if (row) {
+				// If the row does not exist, insert a new row
+				const sql = `
+					INSERT OR REPLACE INTO creations (id, name, link, thumbnail, creator, description, tags, order_id, order_number)
+					VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+				`;
+				const params = [row.id, row.name, row.link, row.thumbnail, row.creator, description, tags, row.order_id, row.order_number];
+				db.run(sql, params, (err) => {
+					if (err) {
+						throw err;
+					}
+					event.reply('save-creation-data-reply');
+				});
+			} else {
+				console.log('Row does not exist:', row);
+			}
+		});
+
+		closeDB(db);
 	});
 };
 

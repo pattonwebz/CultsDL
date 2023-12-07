@@ -1,4 +1,3 @@
-// src/Pages/OrdersPage.tsx
 import React, { useEffect, useState } from 'react';
 import {Typography, Button, Box} from '@material-ui/core';
 import OrdersTable from '../Componets/OrdersTable';
@@ -8,6 +7,7 @@ import { fetchDownloadPage } from '../Processors/DownloadPages';
 import { type Order } from '../Types/interfaces';
 import CreationsTableDB from '../Componets/CreationsTableDB';
 import OrdersTableDB from '../Componets/OrdersTableDB';
+import {creationPageProcessor, saveCreationData} from '../Processors/CreationPageProcessor';
 
 const ipcRenderer = window.electron.ipcRenderer;
 
@@ -40,22 +40,31 @@ const OrdersPage: React.FC = () => {
 	}, []);
 
 	useEffect(() => {
-		ipcRenderer.send('get-orders-from-file');
-		ipcRenderer.on('get-orders-from-file-reply', (_, orders) => {
-			setOrders(orders);
-		});
 		ipcRenderer.on('fetch-orders-reply', (_, html) => {
 			const newOrders = processOrdersReply(html, setNextPage);
 			ordersLocal = ordersLocal.concat(newOrders);
 			setOrders(ordersLocal);
 		});
+
+		ipcRenderer.on('fetch-creation-page-reply', async (_, creationInfo) => {
+			console.log('creationInfo', creationInfo);
+			const {html, id} = creationInfo;
+			console.log('creation page descrupct', html, id)
+			const creationData = await creationPageProcessor(html, id);
+			ipcRenderer.send('save-creation-data', creationData);
+		});
+
+		// ipcRenderer.on('fetch-creation-data', (_, data) => {
+		// 	const [link, id] = data;
+		// 	const creationData = creationPageProcessor(html, id);
+		// 	saveCreationData(creationData);
+		// });
 	}, []);
 
 	useEffect(() => {
 		if (orders.length === 0) {
 			return;
 		}
-		ipcRenderer.send('ordersParsed', orders);
 
 		if (nextPage !== '') {
 			ipcRenderer.send('fetch-orders', nextPage);
@@ -92,12 +101,12 @@ const OrdersPage: React.FC = () => {
 			const processedOrders = ordersAndCreations.map((orderAndCreation) => {
 				return {
 					id: orderAndCreation.id,
-					number: orderAndCreation.order_number,
-					date: orderAndCreation.order_date,
+					number: orderAndCreation.number,
+					date: orderAndCreation.date,
 					itemCount: orderAndCreation.creations.length,
 					creations: orderAndCreation.creations,
-					price: orderAndCreation.order_total,
-					link: orderAndCreation.order_link
+					price: orderAndCreation.price,
+					link: orderAndCreation.link
 				}
 			});
 			console.log(processedOrders);
@@ -117,6 +126,23 @@ const OrdersPage: React.FC = () => {
 			setIsFetchingDownloadPages(false);
 		});
 	}
+
+	async function handleFetchCreationPages (): Promise<void> {
+		const selectedOrderRowsData = ordersWithCreations.filter((row) => {
+			return selectedOrderRows.includes(row.id);
+		});
+		console.log('selectedOrderRowsforCreations', selectedOrderRowsData);
+		selectedOrderRowsData.forEach((order) => {
+			order.creations.forEach((creation) => {
+				console.log('creation for extra info', creation);
+				const id = creation.id;
+				const link = creation.link;
+
+				ipcRenderer.send('fetch-creation-page', {link, id});
+			});
+		});
+
+	};
 
 	return (
 		<div>
@@ -140,7 +166,10 @@ const OrdersPage: React.FC = () => {
 				</Button>
 				<Button variant="contained" color="secondary" onClick={handleFetchDownloadPages}
 					disabled={selectedOrderRows.length < 1 || isFetchingDownloadPages}>
-                    Fetch Download Pages for selected orders
+                    Fetch Files Data
+				</Button>
+				<Button variant="contained" color="secondary" onClick={handleFetchCreationPages}>
+					Fetch Creations Extra Data
 				</Button>
 			</Stack>
 
@@ -149,7 +178,7 @@ const OrdersPage: React.FC = () => {
 				<Typography variant="body2">
 					{(progress.totalInQueue !== 0) && (
 						<>
-                      Downloads in Queue: {progress.totalInQueue}
+                      Downloads in Queue: {progress.totalInQueue + 1}
 							<br />
 						</>
 					)}
