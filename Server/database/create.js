@@ -50,6 +50,7 @@ const createDatabase = (db) => {
 			name TEXT NOT NULL DEFAULT '',
 			link TEXT NOT NULL DEFAULT '',
 			thumbnail TEXT NOT NULL DEFAULT '',
+			images BLOB NOT NULL DEFAULT '[]',
 			downloaded_all_files INTEGER NOT NULL DEFAULT 0,
 			creator TEXT NOT NULL DEFAULT '',
 			description TEXT NOT NULL DEFAULT '',
