@@ -17,6 +17,7 @@ const getOrdersWithCreations = require('./database/getOrdersWithCreations');
 const { getOrderById } = require('./database/getOrderByX');
 const { getCreationsByOrderId, getCreationsByOrderNumber } = require('./database/getCreationByX');
 const getCreationPage = require('./fetchCreationExtraData');
+const testToken = require('./testSessionToken');
 
 const setupIpcHandlers = () => {
 	ipcMain.on('requestSessionToken', (event) => {
@@ -195,6 +196,10 @@ const setupIpcHandlers = () => {
 
 
 		closeDB(db);
+	});
+
+	ipcMain.handle('test-session-token', async (event, token) => {
+		return testToken();
 	});
 };
 

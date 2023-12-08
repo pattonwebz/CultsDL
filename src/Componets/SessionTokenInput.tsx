@@ -7,20 +7,46 @@ function Alert (props: AlertProps): React.ReactElement {
 	return <MuiAlert elevation={6} variant="filled" {...props} />;
 }
 
+const ipcRenderer = window.electron.ipcRenderer;
+
 const SessionTokenInput: React.FC = () => {
 	const { getSessionToken, saveSessionToken } = useUserData();
 	const [sessionToken, setSessionToken] = useState(getSessionToken());
 	const [open, setOpen] = useState(false);
+	const [message, setMessage] = useState('');
+	const [alertSeverity, setAlertSeverity] = useState('success');
 
 	const handleSave = (): void => {
 		setSessionToken(sessionToken);
 		setOpen(true);
 	};
 
+	const handleTestTokenClick = async (): Promise<void> => {
+		await ipcRenderer.invoke('test-session-token', sessionToken);
+	}
+
+	useEffect(() => {
+		ipcRenderer.on('test-session-token-reply', (event, valid) => {
+			console.log('test-session-token-reply', valid);
+			if (valid === true) {
+				setMessage('Session token is valid!');
+				setAlertSeverity('success');
+			} else {
+				setMessage('Session token is invalid!');
+				setAlertSeverity('error');
+			}
+			setOpen(true);
+		});
+	}, []);
+
 	const handleClose = (event?: React.SyntheticEvent, reason?: string): void => {
 		if (reason === 'clickaway') {
 			return;
 		}
+		setTimeout(() => {
+			setMessage('');
+			setAlertSeverity('success')
+		}, 1000);
 		setOpen(false);
 	};
 
@@ -45,10 +71,16 @@ const SessionTokenInput: React.FC = () => {
 			</Grid>
 			<Grid item>
 				<Button variant="contained" onClick={handleSave}>Save</Button>
+
+				<Button variant="contained" color="secondary" onClick={handleTestTokenClick}
+					disabled={sessionToken.length < 20}
+				>
+					Test Token
+				</Button>
 			</Grid>
-			<Snackbar open={open} autoHideDuration={3000} onClose={handleClose}>
-				<Alert onClose={handleClose} severity="success">
-          Session token saved successfully!
+			<Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
+				<Alert onClose={handleClose} severity={alertSeverity}>
+          					{message === '' ? 'Session token saved successfully!' : message}
 				</Alert>
 			</Snackbar>
 		</Grid>
