@@ -1,9 +1,9 @@
-const { net, BrowserWindow } = require('electron');
+const { net } = require('electron');
 const { getSessionToken } = require('./userDataStore');
 
 const cache = require('./cache');
 
-const getCreationPage = (url = '', id) => {
+const getCreationPage = async (url = '', id) => {
 	const pageToRequest = url;
 
 	if (!pageToRequest || !id) {
@@ -24,8 +24,7 @@ const getCreationPage = (url = '', id) => {
 			html: htmlFromCache,
 			id
 		};
-		BrowserWindow.getFocusedWindow().webContents.send('fetch-creation-page-reply', data);
-		return;
+		return data;
 	}
 
 	const request = net.request({
@@ -37,6 +36,7 @@ const getCreationPage = (url = '', id) => {
 	});
 
 	let body = '';
+	let dataToReturn = {};
 	request.on('response', (response) => {
 		response.on('data', (chunk) => {
 			body += chunk;
@@ -48,11 +48,16 @@ const getCreationPage = (url = '', id) => {
 				html: htmlFromCache,
 				id
 			};
-			BrowserWindow.getFocusedWindow().webContents.send('fetch-creation-page-reply', data);
+			dataToReturn = data;
 		});
+	});
+	request.on('finish', () => {
+		console.log('Request finished');
+		return dataToReturn;
 	});
 
 	request.end();
+	return dataToReturn;
 };
 
 module.exports = getCreationPage;

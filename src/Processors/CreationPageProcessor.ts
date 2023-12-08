@@ -27,6 +27,21 @@ export async function creationPageProcessor (html: string, creation_id: Number):
 		return doc.querySelector<HTMLParagraphElement>('.creation-page__tab-section > .rich')?.innerText?.trim() || '';
 	}
 
+	function getImages() {
+		let slides = doc.querySelectorAll('.content .creation .product-pane .slides__content picture source');
+		console.log('getting images');
+		console.log(slides);
+		let images: string[] = [];
+		slides.forEach((sc) => {
+			const img = sc.getAttribute('data-srcset') ?? sc.getAttribute('srcset');
+			console.log(img)
+			if (img != null) {
+				images.push(img);
+			}
+		});
+		return images;
+	}
+
 	function getTags() {
 		let tags: string[] = [];
 		doc.querySelectorAll('#content .creation-page__tab-section .inline-list.inline-list--linked a').forEach((taglink) => {
@@ -51,6 +66,7 @@ export async function creationPageProcessor (html: string, creation_id: Number):
 	creationData.description = getDescription();
 	creationData.tags = JSON.stringify(getTags(), null, 2);
 	creationData.id = creation_id
+	creationData.images = JSON.stringify(getImages(), null, 2);
 
 	return creationData;
 }
