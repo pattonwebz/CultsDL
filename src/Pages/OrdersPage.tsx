@@ -88,6 +88,11 @@ const OrdersPage: React.FC = () => {
 	const [dbOrders, setDbOrders] = useState([]);
 	const [dbCreations, setDbCreations] = useState([]);
 	const [ordersWithCreations, setOrdersWithCreations] = useState([]);
+	const [showProgress, setShowProgress] = useState(false);
+
+	useEffect(() => {
+		setShowProgress(progress.fileName !== '');
+	}, [progress.fileName]);
 
 	useEffect(() => {
 		ipcRenderer.send('get-orders-from-db');
@@ -124,7 +129,7 @@ const OrdersPage: React.FC = () => {
                 Orders
 			</Typography>
 			<Typography variant="body1">
-				You can fetch your orders here and the creations that are in them. It's broken into 3 parts on purpose since 3 pages are required to be read for every creation, the order, the download page and the creation page itself. It's not reliable that you can get to the actual creation page from the download page since sometimes they are removed. It's also unclear if there will be one or many files attached of what format they will be in.
+				You can fetch your orders here and the creations that are in them. It is broken into 3 parts on purpose since 3 pages are required to be read for every creation, the order, the download page and the creation page itself.
 			</Typography>
 			<Stack direction="row" spacing={2} sx={{ mb: 2 }}>
 				<Button variant="contained" color="primary" onClick={handleFetchOrders}
@@ -152,7 +157,7 @@ const OrdersPage: React.FC = () => {
 				/>
 			</Stack>
 
-			<Box sx={{ minHeight: '48px' }}>
+			<Box className={showProgress ? 'slideIn' : 'slideOut'}>
 				{(progress.fileName !== '') && (
 					<Typography variant="body2">
 						{(progress.totalInQueue !== 0) && (

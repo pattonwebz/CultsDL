@@ -1,5 +1,5 @@
 // src/Components/FetchFilesDataButton.tsx
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Button, CircularProgress } from '@material-ui/core';
 import { fetchDownloadPage } from '../../Processors/DownloadPages';
 import { FetchButtonProps } from '../../Types/interfaces';
@@ -8,16 +8,14 @@ export const FetchFilesDataButton: React.FC<FetchButtonProps> = ({ selectedOrder
 	const [isWorking, setIsWorking] = React.useState(isFetching);
 	async function handleFetchDownloadPages (): Promise<void> {
 		setIsFetching(true);
+		setIsWorking(true);
 		console.log('about to fetch download pages');
 		await fetchDownloadPage(selectedOrderRowsData).then(() => {
 			console.log('finished Fetching download pages');
 			setIsFetching(false);
+			setIsWorking(false);
 		});
 	}
-
-	useEffect(() => {
-		setIsWorking(isFetching);
-	}, [isFetching]);
 
 	return (
 		<Button
@@ -26,7 +24,7 @@ export const FetchFilesDataButton: React.FC<FetchButtonProps> = ({ selectedOrder
 			onClick={handleFetchDownloadPages}
 			disabled={isFetching || isWorking || !isRowsSelected}>
 			Fetch Files Data {isWorking && '... '}
-			{isWorking && <CircularProgress size={22}/>}
+			{isWorking && <CircularProgress sx={{ marginLeft: 0.25 }} size={22}/>}
 		</Button>
 	);
 };

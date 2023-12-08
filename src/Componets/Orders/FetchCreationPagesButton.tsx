@@ -95,7 +95,7 @@ export const FetchCreationPagesButton: React.FC<FetchButtonProps> = ({ selectedO
 				disabled={isWorking || !isRowsSelected}
 			>
 			Fetch Creations Extra Data {isWorking && '... '}
-				{isWorking && <CircularProgress size={22}/>}
+				{isWorking && <CircularProgress sx={{ marginLeft: 0.25 }} size={22}/>}
 			</Button>
 			<Snackbar
 				open={openSnackbar || snackBarMessage !== ''}

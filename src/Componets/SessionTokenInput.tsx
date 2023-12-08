@@ -44,11 +44,11 @@ const SessionTokenInput: React.FC = () => {
 				/>
 			</Grid>
 			<Grid item>
-				<Button variant="contained" onClick={handleSave}>Save</Button>
+				<Button color="primary" variant="contained" onClick={handleSave}>Save</Button>
 			</Grid>
 			<Snackbar open={open} autoHideDuration={3000} onClose={handleClose}>
 				<Alert onClose={handleClose} severity="success">
-          Session token saved successfully!
+					Session token saved successfully!
 				</Alert>
 			</Snackbar>
 		</Grid>

@@ -1,13 +1,14 @@
 // src/Main.tsx
-import React, {useEffect} from 'react';
-import { Divider, Typography, Box, Button } from '@material-ui/core';
+import React, { useEffect } from 'react';
+import { Divider, Typography, Box, Button, ButtonGroup } from '@material-ui/core';
 import SessionTokenInput from '../Componets/SessionTokenInput';
 import ClearCacheButton from '../Componets/ClearCacheButton';
 import { useUserData } from '../Contexts/UserDataContext';
 
 const OptionsPage: React.FC = () => {
+	const fileInputRef = React.useRef(null);
 
-	const {getDownloadDirectory, saveDownloadDirectory} = useUserData();
+	const { getDownloadDirectory, saveDownloadDirectory } = useUserData();
 	const [value, setValue] = React.useState('');
 	const [directoryPath, setDirectoryPath] = React.useState(getDownloadDirectory);
 
@@ -31,8 +32,12 @@ const OptionsPage: React.FC = () => {
 		setValue('');
 	};
 
+	const handleOpeningDirectoryPickerInput = (): void => {
+		fileInputRef.current.click();
+	};
+
 	const handleRemovingDirectory = (): void => {
-		setDirectoryPath('');;
+		setDirectoryPath(''); ;
 	};
 
 	useEffect(() => {
@@ -55,10 +60,17 @@ const OptionsPage: React.FC = () => {
 			<Typography>
 				The directory to save the files to: <code>{directoryPath}</code>
 			</Typography>
-			<Button variant="contained" onClick={handleRemovingDirectory}>
-				Clear directory and use default in home path
-			</Button>
-			<input type="file" value={value} onChange={handleChange} webkitdirectory="true"/>
+
+			<ButtonGroup variant="contained">
+				<Button color="primary" onClick={handleOpeningDirectoryPickerInput}>
+					Choose downloads directory
+				</Button>
+				<Button color="secondary" onClick={handleRemovingDirectory}>
+					Clear directory and use default in home path
+				</Button>
+			</ButtonGroup>
+
+			<input ref={fileInputRef} style={{ display: 'none' }} type="file" value={value} onChange={handleChange} webkitdirectory="true"/>
 
 			<Box my={2}>
 				<Divider/>
