@@ -15,6 +15,7 @@ declare global {
 		electron: {
 			ipcRenderer:
 			{
+                invoke(arg0: string, creationData: Record<string, string | Number | string[]>): unknown;
 				on: (event: string, callback: (event: any, ...args: any[]) => void) => void
 				send: (event: string, ...args: any[]) => void
 			}
