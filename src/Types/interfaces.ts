@@ -1,4 +1,7 @@
+import React from 'react';
+
 export interface Order {
+    id?: number
     number: string
     date: string
     price: string
@@ -7,6 +10,7 @@ export interface Order {
 }
 
 export interface Creation {
+    id?: number
     title: string
     thumbnail: string
     link: string
@@ -20,4 +24,11 @@ export interface CrationWithData extends Creation {
 
 export interface OrdersTableProps {
 	rows: any[];
+}
+
+export interface FetchButtonProps {
+    selectedOrderRowsData: Order[];
+    isFetching: boolean;
+    setIsFetching: React.Dispatch<React.SetStateAction<boolean>>;
+    isRowsSelected: boolean;
 }

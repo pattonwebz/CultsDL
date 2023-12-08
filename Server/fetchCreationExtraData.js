@@ -1,18 +1,18 @@
-const { net, BrowserWindow } = require('electron');
+const { net } = require('electron');
 const { getSessionToken } = require('./userDataStore');
 
 const cache = require('./cache');
 
-const getCreationPage = (url = '', id) => {
+const getCreationPage = async (url = '', id) => {
 	const pageToRequest = url;
 
 	if (!pageToRequest || !id) {
-		console.log('No page to request');
+		console.error('No page to request');
 		return;
 	}
 
 	if (!pageToRequest.includes('https://cults3d.com')) {
-		console.log('Invalid page to request, maybe this is private??');
+		console.error('Invalid page to request, maybe this is private??');
 		return;
 	}
 
@@ -20,13 +20,11 @@ const getCreationPage = (url = '', id) => {
 	const htmlFromCache = cache.getSync(pageToRequest);
 	if (htmlFromCache) {
 		console.log('Loaded data from cache');
-		// console.log(data);
 		const data = {
 			html: htmlFromCache,
 			id
 		};
-		BrowserWindow.getFocusedWindow().webContents.send('fetch-creation-page-reply', data);
-		return;
+		return data;
 	}
 
 	const request = net.request({
@@ -38,6 +36,7 @@ const getCreationPage = (url = '', id) => {
 	});
 
 	let body = '';
+	let dataToReturn = {};
 	request.on('response', (response) => {
 		response.on('data', (chunk) => {
 			body += chunk;
@@ -49,11 +48,16 @@ const getCreationPage = (url = '', id) => {
 				html: htmlFromCache,
 				id
 			};
-			BrowserWindow.getFocusedWindow().webContents.send('fetch-creation-page-reply', data);
+			dataToReturn = data;
 		});
+	});
+	request.on('finish', () => {
+		console.log('Request finished');
+		return dataToReturn;
 	});
 
 	request.end();
+	return dataToReturn;
 };
 
 module.exports = getCreationPage;

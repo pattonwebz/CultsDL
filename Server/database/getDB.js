@@ -8,7 +8,6 @@ const getDB = () => {
 		if (err) {
 			console.error(err.message);
 		}
-		console.log('Connected to the database.');
 	});
 };
 
@@ -17,7 +16,6 @@ const closeDB = (db) => {
 		if (err) {
 			console.error(err.message);
 		}
-		console.log('Close the database connection.');
 	});
 };
 

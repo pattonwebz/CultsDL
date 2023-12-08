@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React from 'react';
 import { CssBaseline } from '@material-ui/core';
 import { ThemeProvider } from '@material-ui/core/styles';
 import theme from './Themes/MuiTheme';
@@ -15,7 +15,7 @@ declare global {
 		electron: {
 			ipcRenderer:
 			{
-                invoke(arg0: string, sessionToken: any): unknown;
+                invoke(arg0: string, ...args: any[]): unknown;
 				on: (event: string, callback: (event: any, ...args: any[]) => void) => void
 				send: (event: string, ...args: any[]) => void
 			}

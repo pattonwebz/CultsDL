@@ -9,6 +9,18 @@
     <script src="./dist/bundle.js"></script>
   </body>
   <style>
+    .slideOut {
+      transform: translateX(-100%);
+      transition: transform 0.5s ease-in-out;
+      visibility: hidden;
+      height: 0;
+    }
 
+    .slideIn {
+      transform: translateX(0);
+      transition: transform 0.5s ease-in-out;
+      visibility: visible;
+      height: 48px;
+    }
   </style>
 </html>

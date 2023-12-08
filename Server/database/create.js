@@ -12,10 +12,8 @@ const checkIfTableExists = (db, tableName) => {
 				reject(err);
 			}
 			if (row) {
-				console.log(`Table ${tableName} exists.`);
 				resolve(true);
 			} else {
-				console.log(`Table ${tableName} does not exist.`);
 				resolve(false);
 			}
 		});
@@ -52,6 +50,7 @@ const createDatabase = (db) => {
 			name TEXT NOT NULL DEFAULT '',
 			link TEXT NOT NULL DEFAULT '',
 			thumbnail TEXT NOT NULL DEFAULT '',
+			images BLOB NOT NULL DEFAULT '[]',
 			downloaded_all_files INTEGER NOT NULL DEFAULT 0,
 			creator TEXT NOT NULL DEFAULT '',
 			description TEXT NOT NULL DEFAULT '',
@@ -105,7 +104,6 @@ const createDatabase = (db) => {
 		if (err) {
 			console.error(err.message);
 		}
-		console.log('Close the database connection.');
 	});
 };
 

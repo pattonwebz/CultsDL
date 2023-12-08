@@ -4,10 +4,9 @@ import { BASE_URL } from '../Constants';
 const ipcRenderer = window.electron.ipcRenderer;
 
 export async function fetchDownloadPage (selectedOrderRowsData: any): Promise<void> {
+	console.log('fetchDownloadPage', selectedOrderRowsData);
 	for (const orderRowData of selectedOrderRowsData) {
-		console.log('fetching download page for order', orderRowData.id);
-		console.log('fetching download page for order', orderRowData.link)
-		console.log('fetching download page for order', orderRowData.creations)
+		console.log('fetching download page for order', orderRowData.creations);
 		ipcRenderer.send('fetch-download-page', orderRowData.link, orderRowData.id, orderRowData.creations);
 		await new Promise(resolve => {
 			ipcRenderer.on('fetch-download-page-reply', (_, html, orderId, creations) => {
@@ -16,19 +15,19 @@ export async function fetchDownloadPage (selectedOrderRowsData: any): Promise<vo
 
 				const loggedIn = doc.querySelector('.nav__action-login > details > summary > img[title="Manage my profile"]') != null;
 				if (!loggedIn) {
-					console.log('not logged in');
+					console.error('not logged in');
 					resolve(null);
 					return;
 				}
 				const downloadButtonsContainer = doc.querySelector('#content > .grid > .grid-cell:not(.grid-cell--fit)');
 				if (downloadButtonsContainer == null) {
-					console.log('no download buttons container found');
+					console.error('no download buttons container found');
 					resolve(null);
 					return;
 				}
 				const downloadButtons: NodeListOf<HTMLAnchorElement> = downloadButtonsContainer.querySelectorAll('a.btn');
 				if (downloadButtons.length < 1) {
-					console.log('no download buttons found');
+					console.error('no download buttons found');
 					resolve(null);
 					return;
 				}
@@ -40,14 +39,14 @@ export async function fetchDownloadPage (selectedOrderRowsData: any): Promise<vo
 						let creationName = button.href.split('creation=')[1];
 						if (creationName == null) {
 							console.log('no creation name found, faking it with ##UNKNOWNCREATION##');
-							console.log('we will need to figure out how to connect this later')
+							console.log('we will need to figure out how to connect this later');
 							creationName = '##UNKNOWNCREATION##';
 						}
 						if (downloadLinks[creationName] == null) {
 							downloadLinks[creationName] = [];
 						}
 						downloadLinks[creationName].push(button.href.replace('file://', BASE_URL));
-						function stringToSlug(str) {
+						function stringToSlug (str) {
 							return str.toLowerCase().replace(/ - /g, ' ').replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
 						}
 						creations.forEach((creation) => {
@@ -62,31 +61,21 @@ export async function fetchDownloadPage (selectedOrderRowsData: any): Promise<vo
 						});
 					});
 
-				console.log(downloadLinks);
-
 				const orderInfo = {
-					creations,
-					orderId: orderId,
+					orderId,
 					downloadLinks
 				};
 				resolve(orderInfo);
 			});
 		}).then((orderInfo) => {
 			if (orderInfo == null) {
-				console.log('orderInfo is null');
 				return;
 			}
-			console.log('orderInfo', orderInfo);
-			const downloadLinksArray = Object.entries(orderInfo.downloadLinks).map(([creationName, linksArray]) => {
-				console.log(creationName, linksArray);
-				if (Array.isArray(linksArray)) {
-					console.log('linksArray is an array');
-					console.log(linksArray);
-					linksArray.forEach((link) => {
-						console.log('link', link)
-						if (link.includes('https://cults3d.com/')) {
-							console.log('link includes https://cults3d.com/');
 
+			const downloadLinksArray = Object.entries(orderInfo.downloadLinks).map(([creationName, linksArray]) => {
+				if (Array.isArray(linksArray)) {
+					linksArray.forEach((link) => {
+						if (link.includes('https://cults3d.com/')) {
 							const downloadFileData = {
 								orderId: orderInfo?.orderId ?? null,
 								creationName,

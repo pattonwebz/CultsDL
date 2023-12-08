@@ -70,7 +70,7 @@ const SessionTokenInput: React.FC = () => {
 				/>
 			</Grid>
 			<Grid item>
-				<Button variant="contained" onClick={handleSave}>Save</Button>
+				<Button color="primary" variant="contained" onClick={handleSave}>Save</Button>
 
 				<Button variant="contained" color="secondary" onClick={handleTestTokenClick}
 					disabled={sessionToken.length < 20}
@@ -80,7 +80,7 @@ const SessionTokenInput: React.FC = () => {
 			</Grid>
 			<Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
 				<Alert onClose={handleClose} severity={alertSeverity}>
-          					{message === '' ? 'Session token saved successfully!' : message}
+          			{message === '' ? 'Session token saved successfully!' : message}
 				</Alert>
 			</Snackbar>
 		</Grid>

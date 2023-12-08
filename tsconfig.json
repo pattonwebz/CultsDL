@@ -108,5 +108,5 @@
     /* Skip type checking all .d.ts files. */
     "jsx": "react"
   },
-  "include": ["**/*.ts", "**/*.tsx"]
+  "include": ["./src/**/*.ts", "./src/**/*.tsx"]
 }

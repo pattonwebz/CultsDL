@@ -16,22 +16,19 @@ const getUserData = (item) => {
 		fetchedUserData = userdata;
 		const data = JSON.parse(userdata);
 		if (item !== '' && data[item] !== undefined) {
-			console.log('Returning', item, data[item]);
 			return data[item];
 		}
-		console.log('Returning', data);
+
 		return data;
 	}
 
-	console.log('Returning default user data object');
 	return getDefaultUserDataObject();
 };
 
 const saveUserData = (data) => {
-	console.log('Saving user data recieved', data);
 	const json = JSON.stringify(data, null, 2);
 	fetchedUserData = json;
-	console.log('Saving user data passing', json);
+
 	fs.writeFileSync(userDataPath, json);
 };
 
@@ -43,9 +40,9 @@ const saveDownloadDirectory = (downloadDirectory) => {
 
 const saveSessionToken = (token) => {
 	const data = getUserData();
-	console.log('Saving session token bf', data);
+
 	data.token = token;
-	console.log('Saving session token af', data);
+
 	saveUserData(data);
 };
 

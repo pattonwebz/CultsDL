@@ -10,12 +10,12 @@ const getSessionToken = () => {
 	if (fs.existsSync(tokenFilePath)) {
 		let userdata = fs.readFileSync(tokenFilePath, 'utf8');
 		if (userdata) {
-			// console.log('Loaded session token from file', userdata);
+			//
 			userdata = JSON.parse(userdata);
 			return userdata.token || '';
 		}
 	}
-	// console.log('No session token found');
+	//
 	return '';
 };
 

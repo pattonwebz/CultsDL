@@ -43,7 +43,7 @@ const OrdersTable: React.FC<OrdersTablePropsWithChange> = ({ rows, onSelectionCh
 	const [selectedRows, setSelectedRows] = React.useState([]);
 
 	useEffect(() => {
-		console.log('change in child');
+		
 		onSelectionChange(selectedRows);
 	}, [selectedRows]);
 
@@ -57,7 +57,7 @@ const OrdersTable: React.FC<OrdersTablePropsWithChange> = ({ rows, onSelectionCh
 				checkboxSelection
 				getRowHeight={() => 'auto'}
 				onCellClick={(params, event) => {
-					console.log('Cell clicked:', params, event);
+					
 				}}
 				onRowSelectionModelChange={(newRowSelectionModel) => {
 					setSelectedRows(newRowSelectionModel);

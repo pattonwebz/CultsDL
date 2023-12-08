@@ -3,9 +3,11 @@
         "browser": true,
         "es2021": true
     },
+    "parser": "@typescript-eslint/parser",
     "extends": [
         "standard",
-        "plugin:react/recommended"
+        "plugin:react/recommended",
+        "plugin:@typescript-eslint/recommended"
     ],
     "parserOptions": {
         "ecmaVersion": "latest",

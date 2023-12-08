@@ -30,7 +30,7 @@ const UserDataProvider: React.FC<PropsWithChildren<any>> = ({ children }) => {
 		ipcRenderer.send('requestUserData');
 
 		ipcRenderer.on('userData-reply', (event, data) => {
-			console.log('userData-reply', data);
+
 			if (data.token === null || data.token === undefined || data.token === '') {
 				return;
 			}
@@ -48,7 +48,7 @@ const UserDataProvider: React.FC<PropsWithChildren<any>> = ({ children }) => {
 
 	// Function to set the session token
 	const saveSessionToken = (token): void => {
-		console.log('saveSessionToken in datacontext', token)
+
 		setSessionToken(token);
 		ipcRenderer.send('saveSessionToken', token);
 	};
