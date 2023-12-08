@@ -10,21 +10,16 @@ const allowedTables = ['orders', 'creations', 'files'];
  * @param {number} limit - the limit of the query - default 500
  */
 const getRowsByColumnWhereValue = async (table = 'orders', column = 'number', value = 0, limit = 500) => {
-	
-	);
 	if (!allowedTables.includes(table) || !column || value === 0) {
-		
 		return null;
 	}
-	
+
 	const db = getDB();
 	const queryReply = new Promise((resolve, reject) => {
 		db.get(`SELECT * FROM ${table} WHERE ${column} = ?`, [value], (err, row) => {
 			if (err) {
-				
 				reject(err);
 			} else {
-				
 				resolve(row);
 			}
 		});
