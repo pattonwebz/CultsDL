@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import { CssBaseline } from '@material-ui/core';
 import { ThemeProvider } from '@material-ui/core/styles';
 import theme from './Themes/MuiTheme';
@@ -15,6 +15,7 @@ declare global {
 		electron: {
 			ipcRenderer:
 			{
+                invoke(arg0: string, sessionToken: any): unknown;
 				on: (event: string, callback: (event: any, ...args: any[]) => void) => void
 				send: (event: string, ...args: any[]) => void
 			}
@@ -24,6 +25,7 @@ declare global {
 }
 
 const App: React.FC = () => {
+
 	return (
 		<>
 			<ThemeProvider theme={theme}>

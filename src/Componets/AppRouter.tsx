@@ -1,18 +1,38 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import { HashRouter as Router, Routes, Route, NavLink } from 'react-router-dom';
 import { Button, Container, makeStyles } from '@material-ui/core';
 import MainPage from '../Pages/MainPage';
 import OrdersPage from '../Pages/OrdersPage';
 import OptionsPage from '../Pages/OptionsPage';
+import {useUserData} from "../Contexts/UserDataContext";
+import FirstRunInstallPage from "../Pages/FirstRunInstallPage";
 
 const useStyles = makeStyles({
 	router: {
-		backgroundColor: '#1f1f28' // Replace with your desired color
+		backgroundColor: '#1f1f28', // Replace with your desired color
 	}
 });
 
 const AppRouter: React.FC = () => {
 	const classes = useStyles();
+
+	const {installed} = useUserData();
+	console.log('AppRouter installed', installed);
+
+	useEffect(() => {
+		console.log('AppRouter install changed', installed);
+	}, [installed]);
+
+	if (!installed) {
+		return (
+			<Router>
+				<Routes>
+					<Route path="*" element={<MainPage />} />
+					<Route path="/install" element={<FirstRunInstallPage />} />
+				</Routes>
+			</Router>
+		);
+	}
 
 	return (
 		<Router>

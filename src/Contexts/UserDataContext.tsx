@@ -4,8 +4,24 @@ const ipcRenderer = window.electron.ipcRenderer;
 
 const UserDataContext = createContext(null);
 
-
 const UserDataProvider: React.FC<PropsWithChildren<any>> = ({ children }) => {
+
+	const [installed, setInstalled] = React.useState(true);
+
+	useEffect(() => {
+		const installComplete = localStorage.getItem("installComplete");
+		if (installComplete === null) {
+			setInstalled(false);
+		}
+	}, []);
+
+
+	useEffect(() => {
+		if (installed) {
+			localStorage.setItem("installComplete", "true");
+		}
+	}, [installed]);
+
 	const [sessionToken, setSessionToken] = useState('');
 	const [downloadDirectory, setDownloadDirectory] = useState('');
 
@@ -46,8 +62,10 @@ const UserDataProvider: React.FC<PropsWithChildren<any>> = ({ children }) => {
 		ipcRenderer.send('saveDownloadDirectory', directory);
 	};
 
+
+
 	return (
-		<UserDataContext.Provider value={{ getSessionToken, saveSessionToken, getDownloadDirectory, saveDownloadDirectory }}>
+		<UserDataContext.Provider value={{ getSessionToken, saveSessionToken, getDownloadDirectory, saveDownloadDirectory, installed, setInstalled }}>
 			{children}
 		</UserDataContext.Provider>
 	);
