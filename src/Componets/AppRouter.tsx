@@ -26,10 +26,12 @@ const AppRouter: React.FC = () => {
 	if (!installed) {
 		return (
 			<Router>
-				<Routes>
-					<Route path="*" element={<MainPage />} />
-					<Route path="/install" element={<FirstRunInstallPage />} />
-				</Routes>
+				<Container maxWidth="lg">
+					<Routes>
+						<Route path="*" element={<MainPage />} />
+						<Route path="/install" element={<FirstRunInstallPage />} />
+					</Routes>
+				</Container>
 			</Router>
 		);
 	}
