@@ -146,15 +146,20 @@ const setupIpcHandlers = () => {
 		event.reply('get-orders-with-creations-reply', orders);
 	});
 
-	ipcMain.on('fetch-creation-page', async (event, creationInfo) => {
+	ipcMain.handle('fetch-creation-page', async (event, creationInfo) => {
 		const { link, id } = creationInfo;
 
-		getCreationPage(link, id);
+		const data = await getCreationPage(link, id);
+		return data;
 	});
 
-	ipcMain.on('save-creation-data', async (event, data) => {
+	ipcMain.handle('save-creation-data', async (event, data) => {
 		const db = getDB();
-		const { description, tags, id } = data;
+		const { images, description, tags, id } = data;
+		let saved = false;
+
+		console.log('save-creation-data', data);
+		console.log('save-creation-data', images, description, tags, id);
 
 		// Check if the row already exists
 		db.get('SELECT * FROM creations WHERE id = ?', [id], (err, row) => {
@@ -164,15 +169,15 @@ const setupIpcHandlers = () => {
 			if (row) {
 				// If the row does not exist, insert a new row
 				const sql = `
-					INSERT OR REPLACE INTO creations (id, name, link, thumbnail, creator, description, tags, order_id, order_number)
-					VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+					INSERT OR REPLACE INTO creations (id, name, link, thumbnail, images, creator, description, tags, order_id, order_number)
+					VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 				`;
-				const params = [row.id, row.name, row.link, row.thumbnail, row.creator, description, tags, row.order_id, row.order_number];
+				const params = [row.id, row.name, row.link, row.thumbnail, images, row.creator, description, tags, row.order_id, row.order_number];
 				db.run(sql, params, (err) => {
 					if (err) {
 						throw err;
 					}
-					event.reply('save-creation-data-reply');
+					saved = true;
 				});
 			} else {
 				console.log('Row does not exist:', row);
@@ -180,11 +185,11 @@ const setupIpcHandlers = () => {
 		});
 
 		closeDB(db);
+		return saved;
 	});
 
 	ipcMain.on('save-files-data', async (event, data) => {
 		const db = getDB();
-
 
 		closeDB(db);
 	});

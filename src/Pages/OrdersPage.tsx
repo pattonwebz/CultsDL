@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import {Typography, Button, Box} from '@material-ui/core';
+import { Typography, Button, Box } from '@material-ui/core';
 import OrdersTable from '../Componets/OrdersTable';
 import { CircularProgress, LinearProgress, Stack } from '@mui/material';
 import { processOrdersReply } from '../Processors/OrderProcessor';
-import { fetchDownloadPage } from '../Processors/DownloadPages';
-import { type Order } from '../Types/interfaces';
+import { Order } from '../Types/interfaces';
 import CreationsTableDB from '../Componets/CreationsTableDB';
 import OrdersTableDB from '../Componets/OrdersTableDB';
-import {creationPageProcessor, saveCreationData} from '../Processors/CreationPageProcessor';
+import { creationPageProcessor } from '../Processors/CreationPageProcessor';
+import { FetchCreationPagesButton } from '../Componets/Orders/FetchCreationPagesButton';
+import { FetchFilesDataButton } from '../Componets/Orders/FetchFileDataButton';
 
 const ipcRenderer = window.electron.ipcRenderer;
 
@@ -18,11 +19,12 @@ const OrdersPage: React.FC = () => {
 	};
 
 	const [isFetchingOrders, setIsFetchingOrders] = useState(false);
-	const [isFetchingDownloadPages, setIsFetchingDownloadPages] = useState(false);
+	const [isFetchingAnything, setIsFetchingAnything] = useState(false);
 
 	const [orders, setOrders] = React.useState<Order[]>([]);
 	const [nextPage, setNextPage] = React.useState('');
 	const [selectedOrderRows, setSelectedOrderRows] = React.useState([]);
+	const [selectedOrderRowsData, setSelectedOrderRowsData] = React.useState<Order[]>([]);
 
 	let ordersLocal: Order[] = [];
 
@@ -31,6 +33,16 @@ const OrdersPage: React.FC = () => {
 		progress: 0,
 		fileName: ''
 	});
+
+	useEffect(() => {
+		const orderRowsData: Order[] = ordersWithCreations.filter((row: Record<string, any>) => {
+			if (row.id === undefined) {
+				return null;
+			}
+			return selectedOrderRows.includes(row.id);
+		});
+		setSelectedOrderRowsData(orderRowsData);
+	}, [selectedOrderRows]);
 
 	useEffect(() => {
 		window.electron.receive('download-progress', (data) => {
@@ -47,9 +59,8 @@ const OrdersPage: React.FC = () => {
 		});
 
 		ipcRenderer.on('fetch-creation-page-reply', async (_, creationInfo) => {
-			
-			const {html, id} = creationInfo;
-			
+			const { html, id } = creationInfo;
+
 			const creationData = await creationPageProcessor(html, id);
 			ipcRenderer.send('save-creation-data', creationData);
 		});
@@ -69,7 +80,6 @@ const OrdersPage: React.FC = () => {
 		if (nextPage !== '') {
 			ipcRenderer.send('fetch-orders', nextPage);
 		} else {
-			
 			setIsFetchingOrders(false);
 			ipcRenderer.send('all-order-pages-parsed', orders);
 		}
@@ -82,22 +92,16 @@ const OrdersPage: React.FC = () => {
 	useEffect(() => {
 		ipcRenderer.send('get-orders-from-db');
 		ipcRenderer.on('get-orders-from-db-reply', (_, orders) => {
-			
-			
 			setDbOrders(orders);
 		});
 
 		ipcRenderer.send('get-creations-from-db');
 		ipcRenderer.on('get-creations-from-db-reply', (_, creations) => {
-			
-			
 			setDbCreations(creations);
 		});
 
 		ipcRenderer.send('get-orders-with-creations');
 		ipcRenderer.on('get-orders-with-creations-reply', (_, ordersAndCreations) => {
-			
-			
 			const processedOrders = ordersAndCreations.map((orderAndCreation) => {
 				return {
 					id: orderAndCreation.id,
@@ -107,41 +111,12 @@ const OrdersPage: React.FC = () => {
 					creations: orderAndCreation.creations,
 					price: orderAndCreation.price,
 					link: orderAndCreation.link
-				}
+				};
 			});
-			
-			setOrdersWithCreations(processedOrders);
 
+			setOrdersWithCreations(processedOrders);
 		});
 	}, []);
-
-	async function handleFetchDownloadPages (): Promise<void> {
-		setIsFetchingDownloadPages(true);
-		const selectedOrderRowsData = ordersWithCreations.filter((row) => {
-			return selectedOrderRows.includes(row.id);
-		});
-
-		await fetchDownloadPage(selectedOrderRowsData).then(() => {
-			setIsFetchingDownloadPages(false);
-		});
-	}
-
-	async function handleFetchCreationPages (): Promise<void> {
-		const selectedOrderRowsData = ordersWithCreations.filter((row) => {
-			return selectedOrderRows.includes(row.id);
-		});
-		
-		selectedOrderRowsData.forEach((order) => {
-			order.creations.forEach((creation) => {
-				
-				const id = creation.id;
-				const link = creation.link;
-
-				ipcRenderer.send('fetch-creation-page', {link, id});
-			});
-		});
-
-	};
 
 	return (
 		<div>
@@ -163,27 +138,32 @@ const OrdersPage: React.FC = () => {
 						)}
 
 				</Button>
-				<Button variant="contained" color="secondary" onClick={handleFetchDownloadPages}
-					disabled={selectedOrderRows.length < 1 || isFetchingDownloadPages}>
-                    Fetch Files Data
-				</Button>
-				<Button variant="contained" color="secondary" onClick={handleFetchCreationPages}>
-					Fetch Creations Extra Data
-				</Button>
+				<FetchFilesDataButton
+					selectedOrderRowsData={selectedOrderRowsData}
+					isFetching={isFetchingAnything}
+					setIsFetching={setIsFetchingAnything}
+					isRowsSelected={selectedOrderRows.length > 0}
+				/>
+				<FetchCreationPagesButton
+					selectedOrderRowsData={selectedOrderRowsData}
+					isFetching={isFetchingAnything}
+					setIsFetching={setIsFetchingAnything}
+					isRowsSelected={selectedOrderRows.length > 0}
+				/>
 			</Stack>
 
 			<Box sx={{ minHeight: '48px' }}>
-			{(progress.fileName !== '') && (
-				<Typography variant="body2">
-					{(progress.totalInQueue !== 0) && (
-						<>
+				{(progress.fileName !== '') && (
+					<Typography variant="body2">
+						{(progress.totalInQueue !== 0) && (
+							<>
                       Downloads in Queue: {progress.totalInQueue + 1}
-							<br />
-						</>
-					)}
+								<br />
+							</>
+						)}
                 Current Download: {progress.fileName}
-				</Typography>
-			)}
+					</Typography>
+				)}
 			</Box>
 
 			<LinearProgress variant="determinate" value={progress.progress}/>
