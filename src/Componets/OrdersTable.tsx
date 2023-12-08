@@ -43,22 +43,18 @@ const OrdersTable: React.FC<OrdersTablePropsWithChange> = ({ rows, onSelectionCh
 	const [selectedRows, setSelectedRows] = React.useState([]);
 
 	useEffect(() => {
-		
 		onSelectionChange(selectedRows);
 	}, [selectedRows]);
 
 	return (
-		<div style={{ height: 400, width: '100%' }}>
+		<div style={{ height: 350, width: '100%' }}>
 			<DataGrid
 				rows={rows}
 				columns={columns}
-				pageSize={5}
-				rowsPerPageOptions={[5]}
+				pageSize={4}
+				rowsPerPageOptions={[4]}
 				checkboxSelection
 				getRowHeight={() => 'auto'}
-				onCellClick={(params, event) => {
-					
-				}}
 				onRowSelectionModelChange={(newRowSelectionModel) => {
 					setSelectedRows(newRowSelectionModel);
 				}}
