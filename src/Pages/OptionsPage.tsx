@@ -4,6 +4,7 @@ import { Divider, Typography, Box, Button, ButtonGroup } from '@material-ui/core
 import SessionTokenInput from '../Componets/SessionTokenInput';
 import ClearCacheButton from '../Componets/ClearCacheButton';
 import { useUserData } from '../Contexts/UserDataContext';
+import { useAlerts } from '../Contexts/AlertsContext';
 
 const OptionsPage: React.FC = () => {
 	const fileInputRef = React.useRef(null);
@@ -11,6 +12,8 @@ const OptionsPage: React.FC = () => {
 	const { getDownloadDirectory, saveDownloadDirectory } = useUserData();
 	const [value, setValue] = React.useState('');
 	const [directoryPath, setDirectoryPath] = React.useState(getDownloadDirectory);
+
+	const { setAlertMessage, setAlertSeverity, setAlertOpen } = useAlerts();
 
 	const handleChange = (fileInputChange: React.ChangeEvent<HTMLInputElement>): void => {
 		// Check if fileInputChange and its properties exist
@@ -34,10 +37,16 @@ const OptionsPage: React.FC = () => {
 
 	const handleOpeningDirectoryPickerInput = (): void => {
 		fileInputRef.current.click();
+		setAlertMessage('Directory saved successfully!');
+		setAlertSeverity('success');
+		setAlertOpen(true);
 	};
 
 	const handleRemovingDirectory = (): void => {
-		setDirectoryPath(''); ;
+		setDirectoryPath('');
+		setAlertMessage('Directory cleared, will use app folder in home directory!');
+		setAlertSeverity('info');
+		setAlertOpen(true);
 	};
 
 	useEffect(() => {
