@@ -38,6 +38,13 @@ const theme = createTheme({
 			root: {
 				margin: '10px 0' // Add margin as needed
 			}
+		},
+		MuiButton: {
+			root: {
+				'&.navButton$disabled': {
+					color: 'grey' // Replace with your desired color
+				}
+			}
 		}
 	}
 });
