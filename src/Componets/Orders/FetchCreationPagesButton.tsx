@@ -31,12 +31,15 @@ export const FetchCreationPagesButton: React.FC<FetchButtonProps> = ({ selectedO
 			return;
 		}
 		setIsFetching(true);
-		const delayedFetches = async () => {
+
+		let itemsThatNeedReprocessing = [];
+		const delayedFetches = async (sendToProcessor = true) => {
 			let counter = 0;
 			for (const order of creationsToFetchExtraData) {
 				if (!order.creations) {
 					continue;
 				}
+				console.log('order.creations', order.creations);
 				// add a small delay to not overload the server
 				for (const creation of order.creations) {
 					counter = counter === 3 ? 0 : counter;
@@ -44,7 +47,7 @@ export const FetchCreationPagesButton: React.FC<FetchButtonProps> = ({ selectedO
 					const id = creation.id;
 					const link = creation.link;
 					// add a small delay to not overload the server
-					await new Promise(resolve => setTimeout(resolve, counter >= 3 ? 1000 : 330));
+					await new Promise(resolve => setTimeout(resolve, counter >= 3 ? 2000 : 330));
 
 					if (id === undefined || link === undefined) {
 						console.log('undefined id or link');
@@ -62,15 +65,23 @@ export const FetchCreationPagesButton: React.FC<FetchButtonProps> = ({ selectedO
 						console.log('null html');
 						continue;
 					}
-					await sendCreationPageToProcessor(data.html, id);
+
+					console.log('maybe send to processor', sendToProcessor);
+					if (sendToProcessor) {
+						await sendCreationPageToProcessor(data.html, id);
+					}
 					counter++;
 				}
 			}
 		};
-		delayedFetches().then(() => {
-			setIsFetching(false);
-			setIsWorking(false);
-			setOpenSnackbar(true); // Open the Snackbar when fetching is completed
+		delayedFetches(false).then(() => {
+			// I was unsure how to handle the delayed returning of the pages so I just run this 2 times, 2nd pass gets from cache and doesn't need to wait.
+			// TODO: figure out why the pages come back early from the first pass
+			delayedFetches().then(() => {
+				setIsFetching(false);
+				setIsWorking(false);
+				setOpenSnackbar(true); // Open the Snackbar when fetching is completed
+			});
 		});
 	}, [creationsToFetchExtraData]);
 

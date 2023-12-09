@@ -150,8 +150,7 @@ const setupIpcHandlers = () => {
 	ipcMain.handle('fetch-creation-page', async (event, creationInfo) => {
 		const { link, id } = creationInfo;
 
-		const data = await getCreationPage(link, id);
-		return data;
+		return await getCreationPage(link, id);
 	});
 
 	ipcMain.handle('save-creation-data', async (event, data) => {

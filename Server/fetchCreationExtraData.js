@@ -20,11 +20,10 @@ const getCreationPage = async (url = '', id) => {
 	const htmlFromCache = cache.getSync(pageToRequest);
 	if (htmlFromCache) {
 		console.log('Loaded data from cache');
-		const data = {
+		return {
 			html: htmlFromCache,
 			id
 		};
-		return data;
 	}
 
 	const request = net.request({
@@ -52,7 +51,6 @@ const getCreationPage = async (url = '', id) => {
 		});
 	});
 	request.on('finish', () => {
-		console.log('Request finished');
 		return dataToReturn;
 	});
 
