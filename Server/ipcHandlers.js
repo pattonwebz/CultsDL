@@ -17,6 +17,7 @@ const getOrdersWithCreations = require('./database/getOrdersWithCreations');
 const { getOrderById } = require('./database/getOrderByX');
 const { getCreationsByOrderId, getCreationsByOrderNumber } = require('./database/getCreationByX');
 const getCreationPage = require('./fetchCreationExtraData');
+const requestPage = require('./requests/pageRequests');
 
 const setupIpcHandlers = () => {
 	ipcMain.on('requestSessionToken', (event) => {
@@ -98,6 +99,10 @@ const setupIpcHandlers = () => {
 
 	ipcMain.on('fetch-download-page', async (event, url = '', orderNumber = '', creations = []) => {
 		getDownloadPages(url, orderNumber, creations);
+	});
+
+	ipcMain.handle('get-html-body', async (event, url = '') => {
+		return await requestPage(url);
 	});
 
 	// get the order from database with the orderNumber matching the item id
