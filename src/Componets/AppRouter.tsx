@@ -1,13 +1,35 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import { Container } from '@material-ui/core';
 import MainPage from '../Pages/MainPage';
 import OrdersPage from '../Pages/OrdersPage';
 import OptionsPage from '../Pages/OptionsPage';
+import { useUserData } from '../Contexts/UserDataContext';
+import FirstRunInstallPage from '../Pages/FirstRunInstallPage';
 import SnackbarAlerts from './SnackbarAlerts';
 import HeaderMenu from './HeaderMenu';
 
 const AppRouter: React.FC = () => {
+	const { installed } = useUserData();
+	console.log('AppRouter installed', installed);
+
+	useEffect(() => {
+		console.log('AppRouter install changed', installed);
+	}, [installed]);
+
+	if (!installed) {
+		return (
+			<Router>
+				<Container maxWidth="lg">
+					<Routes>
+						<Route path="*" element={<MainPage />} />
+						<Route path="/install" element={<FirstRunInstallPage />} />
+					</Routes>
+				</Container>
+			</Router>
+		);
+	}
+
 	return (
 		<Router>
 			<HeaderMenu />

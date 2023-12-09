@@ -80,6 +80,7 @@ function createWindow () {
 		if (downloadQueue.length > 0) {
 			const downloadData = downloadQueue.shift();
 			isDownloading = true;
+			console.log('startNextDownload', downloadData);
 			ipcMain.emit('current-download', downloadData);
 			currentDownload = downloadData;
 			win.webContents.downloadURL(downloadData.link);
@@ -115,6 +116,9 @@ function createWindow () {
 			path: downloadItem.getSavePath()
 		};
 		ipcMain.emit('download-started', downloadData);
+
+		console.log('downloadItem', downloadData);
+		event.preventDefault();
 
 		downloadItem.on('updated', (event, state) => {
 			if (state === 'interrupted') {

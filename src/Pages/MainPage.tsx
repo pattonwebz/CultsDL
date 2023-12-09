@@ -1,22 +1,42 @@
 // src/Main.tsx
-import React from 'react';
-import { Typography } from '@material-ui/core';
+import React, {useEffect} from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Typography, Button, Box } from '@material-ui/core';
+import {useUserData} from "../Contexts/UserDataContext";
 
 const MainPage: React.FC = () => {
+
+	const {installed} = useUserData();
+
+	const navigate = useNavigate();
+
+	const handleGetStartedClick = () => {
+		navigate('/install');
+	};
+
 	return (
 		<>
-			<Typography variant="h4" component="h1">
-                CultsDL
-			</Typography>
-			<Typography variant="body1">
-                This is a tool to download your Cults3D orders. Cults3D doesn't have a good way to do this so that's why I created this application.
-			</Typography>
-			<Typography variant="body1">
-                This application basically acts on your behalf to automate the downloading tasks.
-			</Typography>
-			<Typography>
-                It also has some logic to organise the files in the way that I like. You can use it to organise the files in the way that you like.
-			</Typography>
+			<Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" height="90vh">
+				<Typography variant="h2" component="h1" gutterBottom>
+					 Welcome to CultsDL
+				</Typography>
+				<Typography variant="h5" component="h2" gutterBottom>
+					Your one-stop solution for managing your Cults3D orders
+				</Typography>
+				<Typography variant="body1" gutterBottom>
+					CultsDL is a tool designed to automate the downloading tasks of your Cults3D orders.
+					Cults3D doesn't provide a convenient way to do this, hence the creation of this application.
+				</Typography>
+				<Typography variant="body1" gutterBottom>
+					In addition to downloading, CultsDL also organizes your files in a way that suits your preference.
+				</Typography>
+				{!installed && (
+					<Button variant="contained" color="primary" size="large" onClick={handleGetStartedClick}>
+						Get Started
+					</Button>
+				)}
+			</Box>
+
 		</>
 	);
 };

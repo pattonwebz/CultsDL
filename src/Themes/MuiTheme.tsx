@@ -30,7 +30,7 @@ const theme = createTheme({
 			main: '#4a4a4a'
 		},
 		error: {
-			main: '#red'
+			main: '#dc143c' // red hex code here
 		}
 	},
 	overrides: {
@@ -48,5 +48,15 @@ const theme = createTheme({
 		}
 	}
 });
+
+const reds = {
+	PureRed: '#FF0000',
+	DarkRed: '#8B0000',
+	FirebrickRed: '#B22222',
+	IndianRed: '#CD5C5C',
+	TomatoRed: '#FF6347',
+	CrimsonRed: '#DC143C',
+	CoralRed: '#FF7F50'
+};
 
 export default theme;

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Snackbar } from '@material-ui/core';
-import MuiAlert, { type AlertProps } from '@material-ui/lab/Alert';
-import { type ReactJSXElement } from '@emotion/react/types/jsx-namespace';
+import { Button, ButtonGroup, Snackbar } from '@material-ui/core';
+import MuiAlert, { AlertProps } from '@material-ui/lab/Alert';
+import { ReactJSXElement } from '@emotion/react/types/jsx-namespace';
 
 const ipcRenderer = window.electron.ipcRenderer;
 
@@ -16,6 +16,26 @@ const ClearCacheButton: React.FC = () => {
 	const handleClearCache = (): void => {
 		setCacheClearing(true);
 		ipcRenderer.send('clear-cache');
+	};
+
+	const handleClearOrders = (): void => {
+		setCacheClearing(true);
+		ipcRenderer.send('clear-orders-cache');
+	};
+
+	const handleClearDownloadPages = (): void => {
+		setCacheClearing(true);
+		ipcRenderer.send('clear-download-pages-cache');
+	};
+
+	const handleClearCreations = (): void => {
+		setCacheClearing(true);
+		ipcRenderer.send('clear-creations-pages-cache');
+	};
+
+	const handleClearFirstOrderPageCache = (): void => {
+		setCacheClearing(true);
+		ipcRenderer.send('clear-first-order-page-cache');
 	};
 
 	const handleClose = (event?: React.SyntheticEvent, reason?: string): void => {
@@ -33,16 +53,22 @@ const ClearCacheButton: React.FC = () => {
 	}, []);
 
 	return (
-		<div>
-			<Button variant="contained" color="primary" onClick={handleClearCache} disabled={cacheClearing}>
-				{ cacheClearing ? 'Clearing cache...' : 'Clear Cache' }
+		<>
+			<Button variant="contained" color="secondary" onClick={handleClearFirstOrderPageCache}>
+				Clear just first order
 			</Button>
+			<ButtonGroup variant="contained" color="primary" disabled={cacheClearing}>
+				<Button onClick={handleClearCache}>Clear Cache</Button>
+				<Button onClick={handleClearOrders}>Clear Orders</Button>
+				<Button onClick={handleClearDownloadPages}>Clear Download Pages</Button>
+				<Button onClick={handleClearCreations}>Clear Creations</Button>
+			</ButtonGroup>
 			<Snackbar open={open} autoHideDuration={3000} onClose={handleClose}>
 				<Alert onClose={handleClose} severity="success">
-          Cache cleared successfully!
+					Cache cleared successfully!
 				</Alert>
 			</Snackbar>
-		</div>
+		</>
 	);
 };
 
