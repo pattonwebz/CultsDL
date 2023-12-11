@@ -1,5 +1,5 @@
-import React from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { Button, makeStyles } from '@material-ui/core';
 
 const useStyles = makeStyles({
@@ -16,6 +16,19 @@ const useStyles = makeStyles({
 const HeaderMenu: React.FC = () => {
 	const classes = useStyles();
 	const location = useLocation();
+	const navigate = useNavigate();
+
+	useEffect(() => {
+		const lastRoute = localStorage.getItem('lastRoute');
+		if (lastRoute) {
+			console.log('lastRoute', lastRoute);
+			navigate(lastRoute);
+		}
+	}, []);
+
+	useEffect(() => {
+		localStorage.setItem('lastRoute', location.pathname);
+	}, [location]);
 
 	return (
 		<div className={classes.router}>
@@ -27,6 +40,11 @@ const HeaderMenu: React.FC = () => {
 			<NavLink to="/orders">
 				<Button className="navButton" color="primary" disabled={location.pathname === '/orders'}>
 					Orders
+				</Button>
+			</NavLink>
+			<NavLink to="/files">
+				<Button className="navButton" color="primary" disabled={location.pathname === '/files'}>
+					Files
 				</Button>
 			</NavLink>
 			<NavLink to="/options">

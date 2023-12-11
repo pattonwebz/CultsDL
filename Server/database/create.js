@@ -73,7 +73,11 @@ const createDatabase = (db) => {
 			name TEXT NOT NULL DEFAULT '',
 			url TEXT NOT NULL DEFAULT '',
 			downloaded INTEGER NOT NULL DEFAULT 0,
-			creation_id INTEGER NOT NULL,
+			file_size INTEGER NOT NULL DEFAULT 0,
+			slugified_creation_name TEXT NOT NULL DEFAULT '',
+			cults_creation_number INTEGER DEFAULT 0,
+			cults_blueprint_number INTEGER DEFAULT 0,
+			creation_id INTEGER,
 			order_id INTEGER NOT NULL,
 			FOREIGN KEY(creation_id) REFERENCES creations(id),
     		FOREIGN KEY(order_id) REFERENCES orders(id)

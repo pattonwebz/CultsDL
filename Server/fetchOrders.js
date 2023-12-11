@@ -4,40 +4,24 @@ const { CONSTANTS } = require('./constants');
 const { BASE_URL } = CONSTANTS;
 
 const cache = require('./cache');
+const requestPage = require('./requests/pageRequests');
+const ipcRenderer = require('electron').ipcRenderer;
 
-const getOrders = (url = '') => {
+const fetchOrders = async (url = '') => {
 	const pageToRequest = url || BASE_URL + '/en/orders';
+	// console.log('fetchOrders', pageToRequest);
 
-	// Try to read from the cache
-	const data = cache.getSync(pageToRequest);
-	if (data) {
-		console.log('Loaded data from cache');
-		// console.log(data);
-		BrowserWindow.getFocusedWindow().webContents.send('fetch-orders-reply', data);
-		return;
-	}
-
-	const request = net.request({
-		method: 'GET',
-		url: pageToRequest,
-		headers: {
-			Cookie: '_session_id=' + getSessionToken()
-		}
+	await requestPage(pageToRequest).then((body) => {
+		// console.log('fetchOrders body', body);
+		cache.setSync(pageToRequest, body);
+		// add a small delay to ensure body is complete before processing
+		setTimeout(() => {
+			const browserSessions = BrowserWindow.getAllWindows();
+			browserSessions.forEach((win) => {
+				win.webContents.send('fetch-orders-reply', body);
+			});
+		}, 20);
 	});
-
-	let body = '';
-	request.on('response', (response) => {
-		response.on('data', (chunk) => {
-			body += chunk;
-		});
-		response.on('end', () => {
-			// Save data to the cache
-			cache.setSync(pageToRequest, body);
-			BrowserWindow.getFocusedWindow().webContents.send('fetch-orders-reply', body);
-		});
-	});
-
-	request.end();
 };
 
-module.exports = getOrders;
+module.exports = fetchOrders;

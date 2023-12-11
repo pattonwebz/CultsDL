@@ -3,13 +3,15 @@ import { BASE_URL } from '../Constants';
 import { type Order, type Creation } from '../Types/interfaces';
 
 export function processOrdersReply (html: string, setNextPage: (nextPage: string) => void): Order[] {
-	
+	console.log('processOrdersReply');
 	const parser = new DOMParser();
 	const doc = parser.parseFromString(html, 'text/html');
 	const nextPageElement = doc.querySelector('.pagination .paginate.next a');
 	if ((nextPageElement != null) && nextPageElement instanceof HTMLAnchorElement) {
+		console.log('next page found');
 		setNextPage(nextPageElement.href.replace('file://', BASE_URL));
 	} else {
+		console.log('no next page found');
 		setNextPage('');
 	}
 
@@ -17,12 +19,10 @@ export function processOrdersReply (html: string, setNextPage: (nextPage: string
 	doc.querySelectorAll('#content table tbody tr').forEach((row) => {
 		const cells = row.querySelectorAll<HTMLTableCellElement>('td');
 		if (cells.length < 5) {
-			
 			return;
 		}
 		// check if cells[0] through cells[4] are valid
 		if ((cells[0] == null) || (cells[1] == null) || (cells[3] == null) || (cells[4] == null)) {
-			
 			return;
 		}
 
@@ -87,8 +87,8 @@ export function processOrdersReply (html: string, setNextPage: (nextPage: string
 			}
 		});
 
-		// 
-		
+		//
+
 		order.creations = creations;
 		newOrders.push(order);
 	});

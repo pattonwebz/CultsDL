@@ -3,6 +3,7 @@ import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import { Container } from '@material-ui/core';
 import MainPage from '../Pages/MainPage';
 import OrdersPage from '../Pages/OrdersPage';
+import FilesPage from '../Pages/FilesPage';
 import OptionsPage from '../Pages/OptionsPage';
 import { useUserData } from '../Contexts/UserDataContext';
 import FirstRunInstallPage from '../Pages/FirstRunInstallPage';
@@ -25,6 +26,7 @@ const AppRouter: React.FC = () => {
 						<Route path="*" element={<MainPage />} />
 						<Route path="/install" element={<FirstRunInstallPage />} />
 					</Routes>
+					<SnackbarAlerts />
 				</Container>
 			</Router>
 		);
@@ -37,6 +39,7 @@ const AppRouter: React.FC = () => {
 				<Routes>
 					<Route path="/main" element={<MainPage />} />
 					<Route path="/orders" element={<OrdersPage />} />
+					<Route path="/files" element={<FilesPage />} />
 					<Route path="/options" element={<OptionsPage />} />
 					<Route path="*" element={<MainPage />} />
 				</Routes>

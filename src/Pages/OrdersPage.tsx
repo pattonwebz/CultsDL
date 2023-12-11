@@ -4,11 +4,10 @@ import OrdersTable from '../Componets/OrdersTable';
 import { CircularProgress, LinearProgress, Stack } from '@mui/material';
 import { processOrdersReply } from '../Processors/OrderProcessor';
 import { Order } from '../Types/interfaces';
-import CreationsTableDB from '../Componets/CreationsTableDB';
-import OrdersTableDB from '../Componets/OrdersTableDB';
 import { creationPageProcessor } from '../Processors/CreationPageProcessor';
 import { FetchCreationPagesButton } from '../Componets/Orders/FetchCreationPagesButton';
 import { FetchFilesDataButton } from '../Componets/Orders/FetchFileDataButton';
+import DownloadProgress from '../Componets/DownloadProgress';
 
 const ipcRenderer = window.electron.ipcRenderer;
 
@@ -28,12 +27,6 @@ const OrdersPage: React.FC = () => {
 
 	let ordersLocal: Order[] = [];
 
-	const [progress, setProgress] = useState({
-		totalInQueue: 0,
-		progress: 0,
-		fileName: ''
-	});
-
 	useEffect(() => {
 		const orderRowsData: Order[] = ordersWithCreations.filter((row: Record<string, any>) => {
 			if (row.id === undefined) {
@@ -45,14 +38,8 @@ const OrdersPage: React.FC = () => {
 	}, [selectedOrderRows]);
 
 	useEffect(() => {
-		window.electron.receive('download-progress', (data) => {
-			// Update the progress state with the new progress value
-			setProgress(data);
-		});
-	}, []);
-
-	useEffect(() => {
 		ipcRenderer.on('fetch-orders-reply', (_, html) => {
+			console.log('fetch-orders-reply');
 			const newOrders = processOrdersReply(html, setNextPage);
 			ordersLocal = ordersLocal.concat(newOrders);
 			setOrders(ordersLocal);
@@ -85,26 +72,9 @@ const OrdersPage: React.FC = () => {
 		}
 	}, [orders]);
 
-	const [dbOrders, setDbOrders] = useState([]);
-	const [dbCreations, setDbCreations] = useState([]);
 	const [ordersWithCreations, setOrdersWithCreations] = useState([]);
-	const [showProgress, setShowProgress] = useState(false);
 
 	useEffect(() => {
-		setShowProgress(progress.fileName !== '');
-	}, [progress.fileName]);
-
-	useEffect(() => {
-		ipcRenderer.send('get-orders-from-db');
-		ipcRenderer.on('get-orders-from-db-reply', (_, orders) => {
-			setDbOrders(orders);
-		});
-
-		ipcRenderer.send('get-creations-from-db');
-		ipcRenderer.on('get-creations-from-db-reply', (_, creations) => {
-			setDbCreations(creations);
-		});
-
 		ipcRenderer.send('get-orders-with-creations');
 		ipcRenderer.on('get-orders-with-creations-reply', (_, ordersAndCreations) => {
 			const processedOrders = ordersAndCreations.map((orderAndCreation) => {
@@ -124,12 +94,15 @@ const OrdersPage: React.FC = () => {
 	}, []);
 
 	return (
-		<div>
-			<Typography variant="h4">
-                Orders
+		<Box display="flex" flexDirection="column" height="90vh">
+			<Typography variant="h3" gutterBottom>
+                Orders Management
 			</Typography>
-			<Typography variant="body1">
-				You can fetch your orders here and the creations that are in them. It is broken into 3 parts on purpose since 3 pages are required to be read for every creation, the order, the download page and the creation page itself.
+			<Typography variant="body1" gutterBottom>
+				Downloading from cults is a painful experience. This page is
+				here to make it less painful by caching all the pages you would
+				need to visit. If you have more than just a few orders and items
+				then it will take a very long time to process it all.
 			</Typography>
 			<Stack direction="row" spacing={2} sx={{ mb: 2 }}>
 				<Button variant="contained" color="primary" onClick={handleFetchOrders}
@@ -157,23 +130,24 @@ const OrdersPage: React.FC = () => {
 				/>
 			</Stack>
 
-			<Box className={showProgress ? 'slideIn' : 'slideOut'}>
-				{(progress.fileName !== '') && (
-					<Typography variant="body2">
-						{(progress.totalInQueue !== 0) && (
-							<>
-                      Downloads in Queue: {progress.totalInQueue + 1}
-								<br />
-							</>
-						)}
-                Current Download: {progress.fileName}
-					</Typography>
-				)}
-			</Box>
+			{/* <Box className={showProgress ? 'slideIn' : 'slideOut'}> */}
+			{/*	{(progress.fileName !== '') && ( */}
+			{/*		<Typography variant="body2"> */}
+			{/*			{(progress.totalInQueue !== 0) && ( */}
+			{/*				<> */}
+			{/*          Downloads in Queue: {progress.totalInQueue + 1} */}
+			{/*					<br /> */}
+			{/*				</> */}
+			{/*			)} */}
+			{/*    Current Download: {progress.fileName} */}
+			{/*		</Typography> */}
+			{/*	)} */}
+			{/* </Box> */}
 
-			<LinearProgress variant="determinate" value={progress.progress}/>
+			{/* <LinearProgress variant="determinate" value={progress.progress}/> */}
+			<DownloadProgress/>
 			<OrdersTable rows={ordersWithCreations} onSelectionChange={setSelectedOrderRows}/>
-		</div>
+		</Box>
 	);
 };
 

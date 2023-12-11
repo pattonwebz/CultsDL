@@ -19,7 +19,8 @@ function looseLoggedInCheck (html) {
 }
 
 const requestPage = (url) => {
-	return new Promise((resolve, reject) => {
+	return new Promise(async (resolve, reject) => {
+		console.log(url);
 		if (!url) {
 			console.error('No page to request');
 			reject('No page to request');
@@ -33,10 +34,20 @@ const requestPage = (url) => {
 
 		const cachedBody = cache.getSync(url);
 		if (cachedBody) {
+			// wait 0.5 seconds before moving on
+			await new Promise((resolve) => setTimeout(resolve, 1000));
 			console.log('Loaded data from cache');
 			resolve(cachedBody);
 			return;
 		}
+
+		// since we are making a request to an outside server and they may
+		// block us if we make too many requests, we will add a random delay
+
+		const min = Math.ceil(300);
+		const max = Math.floor(2000);
+		const waitTime = Math.floor(Math.random() * (max - min + 1)) + min;
+		await new Promise((resolve) => setTimeout(resolve, waitTime));
 
 		const request = net.request({
 			method: 'GET',

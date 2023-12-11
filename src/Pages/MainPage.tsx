@@ -1,12 +1,11 @@
 // src/Main.tsx
-import React, {useEffect} from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Typography, Button, Box } from '@material-ui/core';
-import {useUserData} from "../Contexts/UserDataContext";
+import { useUserData } from '../Contexts/UserDataContext';
 
 const MainPage: React.FC = () => {
-
-	const {installed} = useUserData();
+	const { installed } = useUserData();
 
 	const navigate = useNavigate();
 
@@ -28,6 +27,11 @@ const MainPage: React.FC = () => {
 					Cults3D doesn't provide a convenient way to do this, hence the creation of this application.
 				</Typography>
 				<Typography variant="body1" gutterBottom>
+					When processing orders, creations and files there are some artificial delays added to be
+					respectful of Cults3D's servers and to avoid being rate limited or blocked. I am tweaking
+					these values as I test to find the right balance between speed and reliability.
+				</Typography>
+				<Typography variant="body1" gutterBottom>
 					In addition to downloading, CultsDL also organizes your files in a way that suits your preference.
 				</Typography>
 				{!installed && (
@@ -36,7 +40,6 @@ const MainPage: React.FC = () => {
 					</Button>
 				)}
 			</Box>
-
 		</>
 	);
 };

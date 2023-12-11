@@ -5,6 +5,7 @@ import SessionTokenInput from '../Componets/SessionTokenInput';
 import { Dialog } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useUserData } from '../Contexts/UserDataContext';
+import { useAlerts } from '../Contexts/AlertsContext';
 
 const ipcRenderer = window.electron.ipcRenderer;
 
@@ -12,9 +13,13 @@ const FirstRunInstallPage: React.FC = () => {
 	const [openModal, setOpenModal] = useState(false);
 	const [showFinishButton, setShowFinishButton] = useState(false);
 
-	const {installed, setInstalled} = useUserData();
+	const [directoriesCreated, setDirectoriesCreated] = useState(false);
+
+	const { installed, setInstalled } = useUserData();
 
 	const navigate = useNavigate();
+
+	const { setAlertSeverity, setAlertMessage, setAlertOpen } = useAlerts();
 
 	const handleFinished = () => {
 		localStorage.setItem('installComplete', 'true');
@@ -23,7 +28,11 @@ const FirstRunInstallPage: React.FC = () => {
 	};
 
 	const handleInstallClick = () => {
-		ipcRenderer.invoke('install');
+		const directoriesMade = ipcRenderer.invoke('install');
+		if (directoriesMade) {
+			setDirectoriesCreated(true);
+			setOpenModal(true);
+		}
 	};
 
 	const handleSetTokenClick = () => {
@@ -35,17 +44,17 @@ const FirstRunInstallPage: React.FC = () => {
 	};
 
 	useEffect(() => {
-		ipcRenderer.on('install-reply', (event, data) => {
-			console.log('install-reply', data);
-			if (data === true) {
-				setOpenModal(true);
-			}
-		});
-
 		ipcRenderer.on('test-session-token-reply', (event, valid) => {
 			console.log('test-session-token-reply', valid);
 			if (valid === true) {
 				setShowFinishButton(true);
+				setAlertMessage('Session token validated!');
+				setAlertOpen(true);
+			} else {
+				setShowFinishButton(false);
+				setAlertMessage('Session token is invalid!');
+				setAlertSeverity('error');
+				setAlertOpen(true);
 			}
 		});
 	}, []);
@@ -73,11 +82,14 @@ const FirstRunInstallPage: React.FC = () => {
 							</Button>
 						)
 						: (
-							<><Button variant="contained" color="primary" size="large" onClick={handleInstallClick}>
+							<>
+								<Button variant="contained" color="primary" size="large" onClick={handleInstallClick}>
 								Create Data Directories
-							</Button><Button variant="outlined" color="primary" size="large" onClick={handleSetTokenClick}>
+								</Button>
+								{directoriesCreated && <Button variant="contained" color="primary" size="large" onClick={handleSetTokenClick}>
 								Set Session Token
-							</Button></>
+								</Button>}
+							</>
 						)
 					}
 				</ButtonGroup >

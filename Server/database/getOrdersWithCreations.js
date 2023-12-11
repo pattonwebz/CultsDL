@@ -1,11 +1,16 @@
 const { getDB } = require('./getDB');
 
-const getOrdersWithCreations = async () => {
+const getOrdersWithCreations = async (ids = []) => {
 	const db = getDB();
 
 	// Fetch all orders
 	let orders = await new Promise((resolve, reject) => {
-		db.all('SELECT * FROM orders', [], (err, rows) => {
+		let sql = 'SELECT * FROM orders';
+		if (ids.length > 0) {
+			sql += ' WHERE id IN (' + ids.join(',') + ')';
+		}
+
+		db.all(sql, [], (err, rows) => {
 			if (err) {
 				reject(err);
 			}

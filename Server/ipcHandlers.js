@@ -19,8 +19,16 @@ const { getCreationsByOrderId, getCreationsByOrderNumber } = require('./database
 const getCreationPage = require('./fetchCreationExtraData');
 const requestPage = require('./requests/pageRequests');
 const testToken = require('./testSessionToken');
+const { createDataDirectories, maybeCreateDb } = require('./initialSetup');
+const { getAllFileRows, addCreationIdToFileByFileId } = require('./database/addFile');
 
 const setupIpcHandlers = () => {
+	ipcMain.handle('install', (event, arg) => {
+		createDataDirectories();
+		maybeCreateDb();
+		return true;
+	});
+
 	ipcMain.on('requestSessionToken', (event) => {
 		event.reply('sessionToken', getSessionToken());
 	});
@@ -147,8 +155,8 @@ const setupIpcHandlers = () => {
 		closeDB(db);
 	});
 
-	ipcMain.on('get-orders-with-creations', async (event) => {
-		const orders = await getOrdersWithCreations();
+	ipcMain.on('get-orders-with-creations', async (event, ids = []) => {
+		const orders = await getOrdersWithCreations(ids);
 		event.reply('get-orders-with-creations-reply', orders);
 	});
 
@@ -202,6 +210,24 @@ const setupIpcHandlers = () => {
 
 	ipcMain.handle('test-session-token', async (event, token) => {
 		return testToken();
+	});
+
+	ipcMain.handle('get-all-files', async (event) => {
+		let rowsToSendBack = [];
+		const rows = await getAllFileRows().then((rows) => {
+			console.log('getAllFileRows', rows);
+			rowsToSendBack = rows;
+		});
+		return rowsToSendBack;
+	});
+
+	ipcMain.handle('get-orders-with-creations', async (event, orderIds) => {
+
+	});
+
+	ipcMain.on('add-creation-to-file-in-database', async (event, data) => {
+		console.log('add-creation-to-file-in-database', data);
+		await addCreationIdToFileByFileId(data.selectedFileIds, data.selectedCreationId);
 	});
 };
 
