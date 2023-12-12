@@ -3,8 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
 import { CreationConnectionModal } from '../Componets/CreationConnectionModal';
 import DownloadProgress from '../Componets/DownloadProgress';
-import CreationColumnItem from "../Componets/Table/CreationColumnItem";
-import {Creation} from "../Types/interfaces";
+import CreationColumnItem from '../Componets/Table/CreationColumnItem';
 
 const ipcRenderer = window.electron.ipcRenderer;
 
@@ -38,29 +37,27 @@ const CreationsPage = () => {
 				);
 			},
 			width: 300
-},
-	{
-		field: 'name', headerName
-	:
-		'File Name', width
-	:
+		},
+		{
+			field: 'name',
+			headerName:
+		'File Name',
+			width:
 		200
-	}
-,
-	{
-		field: 'size',
-			headerName
-	:
+		},
+		{
+			field: 'size',
+			headerName:
 		'File Size',
-			width
-	:
+			width:
 		200
-	}
-,
-	{
-		field: 'link', headerName
-	:
-		'File Link', width: 200 },
+		},
+		{
+			field: 'link',
+			headerName:
+		'File Link',
+			width: 200
+		},
 		{ field: 'creation_id', headerName: 'Creation ID', width: 200 },
 		{ field: 'order_id', headerName: 'Order ID', width: 200 },
 		{ field: 'generated_slug', headerName: 'Slug', width: 200 },
