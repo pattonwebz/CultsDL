@@ -57,7 +57,8 @@ const getSessionToken = () => {
 function getDefaultUserDataObject () {
 	return {
 		token: '',
-		downloadDirectory: ''
+		downloadDirectory: '',
+		debug: false
 	};
 }
 
@@ -98,4 +99,15 @@ function createDefaultUserDataFile () {
 	}
 }
 
-module.exports = { getUserData, saveUserData, getSessionToken, saveSessionToken, getDownloadDirectory, saveDownloadDirectory };
+function saveDebug (debug) {
+	const data = getUserData();
+	data.debug = debug;
+	saveUserData(data);
+}
+
+function getDebug() {
+	const debug = getUserData('debug');
+	return debug === true;
+}
+
+module.exports = { getUserData, saveUserData, getSessionToken, saveSessionToken, getDownloadDirectory, saveDownloadDirectory, getDebug, saveDebug };

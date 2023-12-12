@@ -18,6 +18,8 @@ let currentDownload = null;
 let allowFullDownloads = false;
 let win = null;
 
+const logger = require('./Server/logger/logger');
+
 const getWin = () => {
 	return win;
 };
@@ -65,7 +67,7 @@ function createWindow () {
 		trySetCookie();
 
 		ipcMain.on('download-file', (event, data) => {
-			console.log('download-file', data);
+			logger.info('download-file', { message: data });
 			downloadQueue.push(data);
 			event.reply('download-queue-reply', downloadQueue.length);
 		});
@@ -104,11 +106,11 @@ function createWindow () {
 					// the link shold be unique and have no entry in the files table  `url` column
 					isFileDownloaded(getDB(), link).then(async (isDownloaded) => {
 						if (isDownloaded) {
-							console.log('File already downloaded', link);
+							logger.warn('File already downloaded', { message: link });
 							await startNextDownload();
 						} else {
 							isDownloading = true;
-							console.log('startNextDownload', downloadData);
+							logger.debug('startNextDownload', { message: downloadData });
 
 							ipcMain.emit('current-download', downloadData);
 							currentDownload = downloadData;
@@ -118,15 +120,14 @@ function createWindow () {
 									resolve();
 								}, 200);
 							});
-							console.log('downloadData', downloadData);
 							await win.webContents.downloadURL(downloadData.link);
 						}
 					});
 				};
 				await isAlreadyInDB(downloadData.link);
 			} else {
-				const downloadData = downloadQueue.shift();
 				currentDownload = downloadData;
+				logger.debug('startNextDownload', downloadData);
 				await win.webContents.downloadURL(downloadData.link);
 			}
 		} else {
@@ -143,7 +144,7 @@ function createWindow () {
 		if (!cookieSet) {
 			trySetCookie();
 		}
-		// console.log('will-download', downloadItem.getFilename());
+		// logger.debug('will-download', downloadItem.getFilename());
 		// Set the save path, making Electron notdownloadData to prompt a save dialog.
 		const userSavedDownloadDirectory = getUserData('downloadDirectory');
 		const downloadsDir = userSavedDownloadDirectory !== '' ? userSavedDownloadDirectory : DOWNLOAD_DIR;
@@ -169,7 +170,7 @@ function createWindow () {
 		}
 
 		const filePath = downloadsDir + '/' + maybeCreatorAndCreation + downloadItem.getFilename();
-		console.log('filePath', filePath);
+		logger.debug('filePath', { message: filePath });
 
 		// check if the filepath already exists
 
@@ -179,24 +180,24 @@ function createWindow () {
 
 		currentDownload.fileData = downloadData;
 		ipcMain.emit('download-started', downloadData);
-		console.log('\n\n\n');
-		// console.log('currentDownload', currentDownload);
+		// logger.debug('currentDownload', { message: currentDownload });
 		if (!allowFullDownloads) {
 			addFileToDatabase(currentDownload);
 		}
 
-		console.log('downloadItem', downloadData);
+		logger.debug('downloadItem', { message: downloadData });
 
 		if (!allowFullDownloads || existsSync(filePath)) {
+			logger.warn('File already exists', { message: filePath });
 			event.preventDefault();
 		}
 
 		downloadItem.on('updated', (event, state) => {
 			if (state === 'interrupted') {
-				console.log('Download is interrupted but can be resumed');
+				logger.warn('Download is interrupted but can be resumed');
 			} else if (state === 'progressing') {
 				if (downloadItem.isPaused()) {
-					console.log('Download is paused');
+					logger.warn('Download is paused');
 				} else {
 					const progress = downloadItem.getReceivedBytes() / downloadItem.getTotalBytes();
 					const fileName = downloadItem.getFilename();
@@ -206,16 +207,16 @@ function createWindow () {
 						progress: progress * 100,
 						fileName
 					});
-					console.log(`Received bytes: ${downloadItem.getReceivedBytes()}`);
+					logger.debug(`Received bytes: ${downloadItem.getReceivedBytes()}`);
 				}
 			}
 		});
 
 		downloadItem.once('done', (event, state) => {
 			if (state === 'completed') {
-				console.log('Download successfully');
+				logger.info('Download successfully');
 			} else {
-				console.log(`Download failed: ${state}`);
+				logger.warn(`Download failed: ${state}`);
 			}
 			isDownloading = false;
 			startNextDownload();
@@ -225,7 +226,7 @@ function createWindow () {
 function trySetCookie () {
 	const sessionToken = getSessionToken();
 	if (!sessionToken) {
-		console.log('no token to set in cookie');
+		logger.error('no token to set in cookie');
 		return;
 	}
 
@@ -242,10 +243,10 @@ function trySetCookie () {
 				.then(() => {
 					cookieSet = true;
 				}, (error) => {
-					console.error('Failed to set cookie:', error);
+					logger.error('Failed to set cookie:', error);
 				});
 		}, (error) => {
-			console.error('Failed to remove cookie:', error);
+			logger.error('Failed to remove cookie:', error);
 		});
 
 	ipcMain.on('enable-full-download', () => {

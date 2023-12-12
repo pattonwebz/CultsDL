@@ -1,6 +1,6 @@
 // ipcHandlers.js
 const { ipcMain } = require('electron');
-const { getSessionToken, saveSessionToken, getUserData, saveDownloadDirectory } = require('./userDataStore');
+const { getSessionToken, saveSessionToken, getUserData, saveDownloadDirectory, getDebug, saveDebug } = require('./userDataStore');
 const getOrders = require('./fetchOrders');
 const cache = require('./cache');
 const { writeFile, existsSync, mkdirSync, readFileSync } = require('fs');
@@ -21,6 +21,7 @@ const requestPage = require('./requests/pageRequests');
 const testToken = require('./testSessionToken');
 const { createDataDirectories, maybeCreateDb } = require('./initialSetup');
 const { getAllFileRows, addCreationIdToFileByFileId } = require('./database/addFile');
+const logger = require('./logger/logger');
 
 const setupIpcHandlers = () => {
 	ipcMain.handle('install', (event, arg) => {
@@ -43,6 +44,10 @@ const setupIpcHandlers = () => {
 
 	ipcMain.on('saveDownloadDirectory', (event, directory) => {
 		saveDownloadDirectory(directory);
+	});
+
+	ipcMain.on('saveDebug', (event, debug) => {
+		saveDebug(debug);
 	});
 
 	ipcMain.on('fetch-orders', async (event, url = '') => {
@@ -84,10 +89,10 @@ const setupIpcHandlers = () => {
 		orders.forEach((order) => {
 			const existingOrder = allOrders.find((o) => o.number === order.number);
 			if (!existingOrder) {
-				console.log('Adding order: ', order.number);
+				logger.info('Adding order: ', { message: order.number });
 				allOrders.push(order);
 			} else {
-				console.log('Order already exists: ', order.number);
+				logger.warn('Order already exists: ', { message: order.number });
 			}
 		});
 
@@ -124,12 +129,12 @@ const setupIpcHandlers = () => {
 	});
 
 	ipcMain.handle('get-creations-by-order-id', async (event, orderId) => {
-		console.log('get-creations-by-order-id', orderId);
+		logger.info('get-creations-by-order-id', orderId);
 		return await getCreationsByOrderId(orderId);
 	});
 
 	ipcMain.handle('get-creations-by-order-number', async (event, orderNumber) => {
-		console.log('get-creations-by-order-number', orderNumber);
+		logger.info('get-creations-by-order-number', orderNumber);
 		return await getCreationsByOrderNumber(orderNumber);
 	});
 
@@ -172,12 +177,13 @@ const setupIpcHandlers = () => {
 		const { images, description, tags, id } = data;
 		let saved = false;
 
-		console.log('save-creation-data', data);
-		console.log('save-creation-data', images, description, tags, id);
+		logger.info('save-creation-data', { message: data });
+		logger.info('save-creation-data', { message: images, description, tags, id });
 
 		// Check if the row already exists
 		db.get('SELECT * FROM creations WHERE id = ?', [id], (err, row) => {
 			if (err) {
+				logger.error('Error getting row', { message: err })
 				throw err;
 			}
 			if (row) {
@@ -194,7 +200,7 @@ const setupIpcHandlers = () => {
 					saved = true;
 				});
 			} else {
-				console.log('Row does not exist:', row);
+				logger.debug('Row does not exist:', { message: row });
 			}
 		});
 
@@ -215,7 +221,7 @@ const setupIpcHandlers = () => {
 	ipcMain.handle('get-all-files', async (event) => {
 		let rowsToSendBack = [];
 		const rows = await getAllFileRows().then((rows) => {
-			console.log('getAllFileRows', rows);
+			logger.info('getAllFileRows', { message: rows});
 			rowsToSendBack = rows;
 		});
 		return rowsToSendBack;
@@ -226,8 +232,9 @@ const setupIpcHandlers = () => {
 	});
 
 	ipcMain.on('add-creation-to-file-in-database', async (event, data) => {
-		console.log('add-creation-to-file-in-database', data);
+		logger.info('add-creation-to-file-in-database', { message: data });
 		await addCreationIdToFileByFileId(data.selectedFileIds, data.selectedCreationId);
+		event.reply('add-creation-to-file-in-database-reply', true);
 	});
 };
 

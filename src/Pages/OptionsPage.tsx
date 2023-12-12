@@ -1,6 +1,6 @@
 // src/Main.tsx
 import React, { useEffect } from 'react';
-import { Divider, Typography, Box, Button, ButtonGroup } from '@material-ui/core';
+import { Divider, Typography, Box, Button, ButtonGroup, Checkbox } from '@material-ui/core';
 import SessionTokenInput from '../Componets/SessionTokenInput';
 import ClearCacheButton from '../Componets/ClearCacheButton';
 import { useUserData } from '../Contexts/UserDataContext';
@@ -13,7 +13,30 @@ const OptionsPage: React.FC = () => {
 	const [value, setValue] = React.useState('');
 	const [directoryPath, setDirectoryPath] = React.useState(getDownloadDirectory);
 
-	const { setAlertMessage, setAlertSeverity, setAlertOpen } = useAlerts();
+	const { setAlertDuration, setAlertMessage, setAlertSeverity, setAlertOpen } = useAlerts();
+
+	const { getDebug, saveDebug } = useUserData();
+	const [checked, setChecked] = React.useState(getDebug);
+
+	const initialDebugState = getDebug();
+
+	const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+		setChecked(event.target.checked);
+	};
+
+	useEffect(() => {
+		if (checked) {
+			console.log('Debug mode enabled');
+		}
+		saveDebug(checked);
+
+		if (initialDebugState !== checked) {
+			setAlertMessage('Debug mode changed, please restart the app for changes to take effect!');
+			setAlertSeverity('warning');
+			setAlertOpen(true);
+			setAlertDuration(60000);
+		}
+	}, [checked]);
 
 	const handleChange = (fileInputChange: React.ChangeEvent<HTMLInputElement>): void => {
 		// Check if fileInputChange and its properties exist
@@ -89,6 +112,14 @@ const OptionsPage: React.FC = () => {
                 Cache
 			</Typography>
 			<ClearCacheButton/>
+			<Box my={2}>
+				<Divider/>
+			</Box>
+			<Typography variant="h4">
+				Debug Mode
+			</Typography>
+			<Typography>When using debug mode more data is logged to the command terminal and console.</Typography>
+			<Checkbox checked={checked} onChange={handleCheckboxChange} /> Enable Debug
 		</>
 	);
 };

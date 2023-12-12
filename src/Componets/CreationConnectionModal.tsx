@@ -2,6 +2,7 @@ import { Box, Button, ButtonGroup, Typography } from '@material-ui/core';
 import { MenuItem, Modal, Select } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import React, { useEffect } from 'react';
+import {useAlerts} from '../Contexts/AlertsContext';
 
 const nextRowsArrayGroups = [];
 const order = null;
@@ -13,12 +14,15 @@ export const CreationConnectionModal = ({ rows, nextRows, setNextRows, nextRowsC
 	const [selectedRows, setSelectedRows] = React.useState([]);
 	const [selectBoxPickedValue, setSelectBoxPickedValue] = React.useState(0);
 
+	const {setAlertMessage, setAlertSeverity, setAlertOpen} = useAlerts();
+
 	useEffect(() => {
 		console.log('selectedRows', selectedRows);
 	}, [selectedRows]);
 
 	const handleOpen = () => {
 		setOpen(true);
+		advanceGroupings();
 	};
 	const handleClose = () => setOpen(false);
 
@@ -95,14 +99,35 @@ export const CreationConnectionModal = ({ rows, nextRows, setNextRows, nextRowsC
 	};
 
 	useEffect(() => {
+		ipcRenderer.on('add-creation-to-file-in-database-reply', (event, data) => {
+			console.log('add-creation-to-file-in-database-reply', data);
+			if (data === true) {
+				setAlertMessage('Creation connected to file successfully!');
+				setAlertSeverity('success');
+				setAlertOpen(true)
+				advanceGroupings();
+			} else {
+				setAlertMessage('Creation connection failed!');
+				setAlertSeverity('error');
+				setAlertOpen(true);
+			}
+		});
+	}, []);
+
+	useEffect(() => {
 		// get the order for the first row in nextRows
-		setNextRowsCreations(ordersRows.find(order => order.id === nextRows[0].order_id));
-		console.log('nextows', nextRows[0]);
-		setSelectBoxPickedValue(nextRows[0]);
+		if (ordersRows && nextRows && nextRows.length > 0) {
+			setNextRowsCreations(ordersRows.find(order => order.id === nextRows[0].order_id));
+			console.log('nextows', nextRows[0]);
+		}
+		setSelectedRows(nextRows.map((row) => row.id));
 	}, [nextRows]);
 
 	useEffect(() => {
 		console.log('nextRowsCreations', nextRowsCreations);
+		if (nextRowsCreations && nextRowsCreations?.creations.length) {
+			setSelectBoxPickedValue(nextRowsCreations.creations[0].id);
+		}
 	}, [nextRowsCreations]);
 
 	return (
@@ -126,14 +151,14 @@ export const CreationConnectionModal = ({ rows, nextRows, setNextRows, nextRowsC
 					backgroundColor: 'white',
 					overflow: 'auto' // Add scrolling when the content exceeds the height
 				}}>
-					<ButtonGroup>
-						<Button variant="contained" color="primary"
+					<ButtonGroup sx={{ mt: 2, mb: 2 }}>
+						<Button variant="contained" color="primary" sx={{ mr: 2 }}
 							onClick={advanceGroupings}>Next Group {nextRowsArrayGroups.length && `(${nextRowsArrayGroups.length + 1})`}</Button>
-						<Button variant="contained" color="warning" onClick={hanldeConnection} >Connect to
+						<Button variant="contained" color="primary" onClick={hanldeConnection} >Connect to
 							Selected Creation</Button>
 					</ButtonGroup>
 					{nextRowsCreations &&
-						<><Select width="400" onChange={(e) => {
+						<><Select sx={{ width: '100%' }} onChange={(e) => {
 							setSelectBoxPickedValue(e.target.value);
 						}}
 								  value={selectBoxPickedValue}>
@@ -158,6 +183,7 @@ export const CreationConnectionModal = ({ rows, nextRows, setNextRows, nextRowsC
 						onRowSelectionModelChange={(rows) =>
 							setSelectedRows(rows)
 						}
+						selectionModel={selectedRows}
 					/>
 				</Box>
 			</Modal>

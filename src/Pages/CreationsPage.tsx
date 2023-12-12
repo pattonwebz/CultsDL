@@ -8,7 +8,7 @@ import {Creation} from "../Types/interfaces";
 
 const ipcRenderer = window.electron.ipcRenderer;
 
-const FilesPage = () => {
+const CreationsPage = () => {
 	const [filesRows, setFilesRows] = React.useState([]);
 	const [ordersRows, setOrdersRows] = React.useState([]);
 	const [rows, setRows] = React.useState([]);
@@ -225,4 +225,4 @@ const FilesPage = () => {
 	);
 };
 
-export default FilesPage;
+export default CreationsPage;

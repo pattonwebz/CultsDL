@@ -4,6 +4,7 @@ import { Container } from '@material-ui/core';
 import MainPage from '../Pages/MainPage';
 import OrdersPage from '../Pages/OrdersPage';
 import FilesPage from '../Pages/FilesPage';
+import CreationsPage from '../Pages/CreationsPage';
 import OptionsPage from '../Pages/OptionsPage';
 import { useUserData } from '../Contexts/UserDataContext';
 import FirstRunInstallPage from '../Pages/FirstRunInstallPage';
@@ -40,6 +41,7 @@ const AppRouter: React.FC = () => {
 					<Route path="/main" element={<MainPage />} />
 					<Route path="/orders" element={<OrdersPage />} />
 					<Route path="/files" element={<FilesPage />} />
+					<Route path="/creations" element={<CreationsPage />} />
 					<Route path="/options" element={<OptionsPage />} />
 					<Route path="*" element={<MainPage />} />
 				</Routes>

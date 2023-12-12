@@ -1,25 +1,27 @@
 const { net } = require('electron');
 const { getSessionToken } = require('./userDataStore');
 
+
 const cache = require('./cache');
+const logger = require('./logger/logger');
 
 const getCreationPage = async (url = '', id) => {
 	const pageToRequest = url;
 
 	if (!pageToRequest || !id) {
-		console.error('No page to request');
+		logger.error('No page to request');
 		return;
 	}
 
 	if (!pageToRequest.includes('https://cults3d.com')) {
-		console.error('Invalid page to request, maybe this is private??');
+		logger.warn('Invalid page to request, maybe this is private??', { message:pageToRequest });
 		return;
 	}
 
 	// Try to read from the cache
 	const htmlFromCache = cache.getSync(pageToRequest);
 	if (htmlFromCache) {
-		console.log('Loaded data from cache');
+		logger.debug('Loaded data from cache', { message: pageToRequest });
 		return {
 			html: htmlFromCache,
 			id

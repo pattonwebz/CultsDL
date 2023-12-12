@@ -24,6 +24,7 @@ const UserDataProvider: React.FC<PropsWithChildren<any>> = ({ children }) => {
 
 	const [sessionToken, setSessionToken] = useState('');
 	const [downloadDirectory, setDownloadDirectory] = useState('');
+	const [debug, setDebug] = useState(false);
 
 	useEffect(() => {
 		// Request the session token from the main process
@@ -39,6 +40,10 @@ const UserDataProvider: React.FC<PropsWithChildren<any>> = ({ children }) => {
 				return;
 			}
 			setDownloadDirectory(data.downloadDirectory);
+			if (data.debug === null || data.debug === undefined) {
+				return;
+			}
+			setDebug(data.debug);
 		});
 	}, []);
 
@@ -62,10 +67,17 @@ const UserDataProvider: React.FC<PropsWithChildren<any>> = ({ children }) => {
 		ipcRenderer.send('saveDownloadDirectory', directory);
 	};
 
+	const getDebug = (): boolean => {
+		return debug;
+	};
 
+	const saveDebug = (debug): void => {
+		setDebug(debug);
+		ipcRenderer.send('saveDebug', debug);
+	};
 
 	return (
-		<UserDataContext.Provider value={{ getSessionToken, saveSessionToken, getDownloadDirectory, saveDownloadDirectory, installed, setInstalled }}>
+		<UserDataContext.Provider value={{ getSessionToken, saveSessionToken, getDownloadDirectory, saveDownloadDirectory, getDebug, saveDebug, installed, setInstalled }}>
 			{children}
 		</UserDataContext.Provider>
 	);

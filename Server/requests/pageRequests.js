@@ -2,6 +2,8 @@ const { net } = require('electron');
 const { getSessionToken } = require('../userDataStore');
 const cache = require('../cache');
 
+const logger = require('../logger/logger');
+
 function isValidUrl (url) {
 	try {
 		new URL(url);
@@ -36,7 +38,7 @@ const requestPage = (url) => {
 		if (cachedBody) {
 			// wait 0.5 seconds before moving on
 			await new Promise((resolve) => setTimeout(resolve, 1000));
-			console.log('Loaded data from cache');
+			logger.debug('Loaded data from cache');
 			resolve(cachedBody);
 			return;
 		}

@@ -1,5 +1,7 @@
 const { getDB, closeDB } = require('./getDB');
 
+const logger = require('../logger/logger');
+
 const getCultsCreationNumber = (link) => {
 	const url = new URL(link);
 
@@ -35,8 +37,8 @@ async function addFileToDatabase (file) {
 	dataToInsert.cults_creation_number = getCultsCreationNumber(file.link);
 	dataToInsert.cults_blueprint_number = getCultsBlueprintNumber(file.link);
 
-	console.log('addFileToDatabase', file);
-	console.log('addFileToDatabase', dataToInsert);
+	logger.debug('addFileToDatabase', { message: file });
+	logger.debug('addFileToDatabase', { message: dataToInsert });
 
 	const db = getDB();
 

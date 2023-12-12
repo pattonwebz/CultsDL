@@ -47,6 +47,11 @@ const HeaderMenu: React.FC = () => {
 					Files
 				</Button>
 			</NavLink>
+			<NavLink to="/creations">
+				<Button className="navButton" color="primary" disabled={location.pathname === '/creations'}>
+					Creations
+				</Button>
+			</NavLink>
 			<NavLink to="/options">
 				<Button className="navButton" color="primary" disabled={location.pathname === '/options'}>
 					Options
