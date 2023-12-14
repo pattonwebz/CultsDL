@@ -39,7 +39,7 @@ const CreationsPage = () => {
 		{
 			field: 'actions',
 			headerName: 'Actions',
-			renderCell: (params: { value }) => {
+			renderCell: (params: { value: number }) => {
 				return (
 					<ButtonGroup>
 						<Button onClick={() => handleDownload(params.value)}>Download</Button>
@@ -54,10 +54,12 @@ const CreationsPage = () => {
 		{ field: 'tags', headerName: 'Tags', width: 350, hide: true },
 	];
 
-	const handleDownload = (creationId) => {
+	const handleDownload = (creationId: number) => {
 		console.log('download');
 		// get the creation ID from the clicked button and find all the file
-		if (!rows) {}
+		if (!rows ) {
+			return;
+		}
 		const creation = rows.find(row => row.id === creationId).creation;
 		const files = creation.files;
 		const images = JSON.parse(creation.images);
