@@ -2,7 +2,7 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const { getSessionToken, getUserData } = require('./Server/userDataStore');
 const { join } = require('path');
-const { existsSync, mkdirSync } = require('fs');
+const { existsSync, mkdirSync, writeFileSync} = require('fs');
 const { setupIpcHandlers } = require('./Server/ipcHandlers');
 const { session } = require('electron');
 const { CONSTANTS } = require('./Server/constants');
@@ -65,6 +65,67 @@ function createWindow () {
 		// win.webContents.send('downloadDirectory', downloadDir);
 
 		trySetCookie();
+
+		ipcMain.on('save-description', (event, data) => {
+			logger.info('save-description', { message: data });
+
+			const userSavedDownloadDirectory = getUserData('downloadDirectory');
+			const downloadsDir = userSavedDownloadDirectory !== '' ? userSavedDownloadDirectory : DOWNLOAD_DIR;
+
+			if (!existsSync(downloadsDir)) {
+				mkdirSync(downloadsDir);
+			}
+
+			let maybeCreatorAndCreation = '';
+			if (allowFullDownloads) {
+				if (!existsSync(downloadsDir + '/' + data.creator_name)) {
+					mkdirSync(downloadsDir + '/' + data.creator_name);
+				}
+				if (!existsSync(downloadsDir + '/' + data.creator_name + '/' + data.creation_name)) {
+					mkdirSync(downloadsDir + '/' + data.creator_name + '/' + data.creation_name);
+				}
+				maybeCreatorAndCreation = data.creator_name + '/' + data.creation_name + '/';
+			}
+
+			const filePath = downloadsDir + '/' + maybeCreatorAndCreation + 'description.txt';
+
+			const tagString = data.tags.length === 0
+				? ''
+				: data.tags.map((tag) => {
+					return '#' + tag;
+				}).join(' ');
+
+			logger.debug('filePath', { message: filePath });
+			let descriptionString =
+`${data.creation_name}
+			
+by ${data.creator_name}`;
+
+			if (data.description.length) {
+				descriptionString += `
+
+\`\`\`
+${data.description}
+\`\`\``;
+			}
+
+			if (data.tags.length) {
+				const tagString = data.tags.length === 0
+					? ''
+					: data.tags.map((tag) => {
+						return '#' + tag;
+					}).join(' ');
+
+				descriptionString += `
+
+${tagString}`;
+
+			}
+
+			logger.debug('descriptionString', { message: descriptionString });
+			// write the file
+			writeFileSync(filePath, descriptionString);
+		});
 
 		ipcMain.on('download-file', (event, data) => {
 			logger.info('download-file', { message: data });
@@ -169,7 +230,12 @@ function createWindow () {
 			maybeCreatorAndCreation = currentDownload.creator_name + '/' + currentDownload.creation_name + '/';
 		}
 
-		const filePath = downloadsDir + '/' + maybeCreatorAndCreation + downloadItem.getFilename();
+		let maybeImage = '';
+		if (Object.prototype.hasOwnProperty.call(currentDownload, 'type') && currentDownload.type === 'image') {
+			maybeImage = 'Images/';
+		}
+
+		const filePath = downloadsDir + '/' + maybeCreatorAndCreation + maybeImage + downloadItem.getFilename();
 		logger.debug('filePath', { message: filePath });
 
 		// check if the filepath already exists

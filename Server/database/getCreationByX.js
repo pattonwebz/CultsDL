@@ -1,4 +1,6 @@
 const { getRowsByColumnWhereValue } = require('./getRowInColumnByValue');
+const { getDB, closeDB } = require('./getDB');
+const { info } = require('../logger/logger');
 
 const getCreationsByX = async (column = 'order_number', value = 0, limit = 500) => {
 	if (!column || !value) {
@@ -26,4 +28,20 @@ const getCreationsByOrderNumber = async (orderNumber) => {
 	return getCreationsByX('order_number', orderNumber);
 };
 
-module.exports = { getCreationsByX, getCreationsById, getCreationById, getCreationsByOrderId, getCreationsByOrderNumber };
+const getAllCreations = async () => {
+	const db = getDB();
+	const foundRows = await new Promise((resolve, reject) => {
+		db.all('SELECT * FROM creations ', [], (err, rows) => {
+			if (err) {
+				reject(err);
+			} else {
+				resolve(rows);
+			}
+		});
+	});
+
+	closeDB(db);
+	return foundRows;
+};
+
+module.exports = { getAllCreations, getCreationsByX, getCreationsById, getCreationById, getCreationsByOrderId, getCreationsByOrderNumber };

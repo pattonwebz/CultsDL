@@ -9,19 +9,20 @@ const getOrdersFromFile = require('./getOrdersFromFile');
 const getDownloadPages = require('./fetchDownloadItems');
 
 const { CONSTANTS } = require('./constants');
-const { DATA_DIR } = CONSTANTS;
+const { DATA_DIR, BASE_URL } = CONSTANTS;
 
 const { getDB, closeDB } = require('./database/getDB');
 const allOrderPagesParsed = require('./database/allOrderPagesParsed');
 const getOrdersWithCreations = require('./database/getOrdersWithCreations');
 const { getOrderById } = require('./database/getOrderByX');
-const { getCreationsByOrderId, getCreationsByOrderNumber } = require('./database/getCreationByX');
+const { getCreationsByOrderId, getCreationsByOrderNumber, getAllCreations} = require('./database/getCreationByX');
 const getCreationPage = require('./fetchCreationExtraData');
 const requestPage = require('./requests/pageRequests');
 const testToken = require('./testSessionToken');
 const { createDataDirectories, maybeCreateDb } = require('./initialSetup');
 const { getAllFileRows, addCreationIdToFileByFileId } = require('./database/addFile');
 const logger = require('./logger/logger');
+const {getRowsByColumnWhereValue} = require('./database/getRowInColumnByValue');
 
 const setupIpcHandlers = () => {
 	ipcMain.handle('install', (event, arg) => {
@@ -57,11 +58,6 @@ const setupIpcHandlers = () => {
 	ipcMain.on('get-cache', async (event, url = '') => {
 		const data = cache.getSync(url);
 		event.reply('get-cache-reply', data);
-	});
-
-	ipcMain.on('clear-cache', async (event) => {
-		await cache.clear();
-		event.reply('cache-cleared');
 	});
 
 	ipcMain.on('all-order-pages-parsed', async (event, orders) => {
@@ -235,6 +231,45 @@ const setupIpcHandlers = () => {
 		logger.info('add-creation-to-file-in-database', { message: data });
 		await addCreationIdToFileByFileId(data.selectedFileIds, data.selectedCreationId);
 		event.reply('add-creation-to-file-in-database-reply', true);
+	});
+
+	ipcMain.on('clear-cache-for-first-order-page', async (event) => {
+		await cache.deleteSync(BASE_URL + '/en/orders');
+		event.reply('cache-cleared', true);
+	});
+
+	ipcMain.on('clear-cache', async (event, type = 'all') => {
+		switch (type) {
+			case 'all':
+				await cache.clear();
+				break;
+			case 'first-order-page':
+				console.log('clearing first order page');
+				await cache.remove(BASE_URL + '/en/orders');
+				break;
+			default:
+				await cache.clear();
+				break;
+		}
+		event.reply('cache-cleared', { cleared: true, type });
+	});
+
+	ipcMain.handle('get-creations-with-files', async (event) => {
+		// Fetch all creations from the database
+		const creations = await getAllCreations();
+		//logger.info('getAllCreations', {message: creations});
+		//console.log('gotcrat', creations);
+
+		// For each creation, fetch the associated files and add them to the creation object
+		for (const creation of creations) {
+			const files = await getRowsByColumnWhereValue('files', 'creation_id', creation.id);
+			console.log('files', files);
+			creation.files = files;
+		}
+
+		// Return the creations with their associated files
+		console.log('creations', creations.length);
+		return creations;
 	});
 };
 

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Button, ButtonGroup, Snackbar } from '@material-ui/core';
 import MuiAlert, { AlertProps } from '@material-ui/lab/Alert';
 import { ReactJSXElement } from '@emotion/react/types/jsx-namespace';
+import {useAlerts} from '../Contexts/AlertsContext';
 
 const ipcRenderer = window.electron.ipcRenderer;
 
@@ -11,7 +12,8 @@ function Alert (props: AlertProps): ReactJSXElement {
 
 const ClearCacheButton: React.FC = () => {
 	const [cacheClearing, setCacheClearing] = useState(false);
-	const [open, setOpen] = useState(false);
+
+	const { setAlertOpen, setAlertMessage } = useAlerts();
 
 	const handleClearCache = (): void => {
 		setCacheClearing(true);
@@ -35,20 +37,17 @@ const ClearCacheButton: React.FC = () => {
 
 	const handleClearFirstOrderPageCache = (): void => {
 		setCacheClearing(true);
-		ipcRenderer.send('clear-first-order-page-cache');
-	};
-
-	const handleClose = (event?: React.SyntheticEvent, reason?: string): void => {
-		if (reason === 'clickaway') {
-			return;
-		}
-		setOpen(false);
+		ipcRenderer.send('clear-cache', 'first-order-page');
 	};
 
 	useEffect(() => {
-		ipcRenderer.on('cache-cleared', () => {
-			setCacheClearing(false);
-			setOpen(true);
+		ipcRenderer.on('cache-cleared', (event, data) => {
+
+			if (data.cleared === true) {
+				setCacheClearing(false);
+				setAlertMessage('Cache cleared for: ' + data.type);
+				setAlertOpen(true);
+			}
 		});
 	}, []);
 
@@ -63,11 +62,6 @@ const ClearCacheButton: React.FC = () => {
 				<Button onClick={handleClearDownloadPages}>Clear Download Pages</Button>
 				<Button onClick={handleClearCreations}>Clear Creations</Button>
 			</ButtonGroup>
-			<Snackbar open={open} autoHideDuration={3000} onClose={handleClose}>
-				<Alert onClose={handleClose} severity="success">
-					Cache cleared successfully!
-				</Alert>
-			</Snackbar>
 		</>
 	);
 };

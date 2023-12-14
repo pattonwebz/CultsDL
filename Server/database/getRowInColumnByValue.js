@@ -16,7 +16,7 @@ const getRowsByColumnWhereValue = async (table = 'orders', column = 'number', va
 
 	const db = getDB();
 	const queryReply = new Promise((resolve, reject) => {
-		db.get(`SELECT * FROM ${table} WHERE ${column} = ?`, [value], (err, row) => {
+		db.all(`SELECT * FROM ${table} WHERE ${column} = ?`, [value], (err, row) => {
 			if (err) {
 				reject(err);
 			} else {
