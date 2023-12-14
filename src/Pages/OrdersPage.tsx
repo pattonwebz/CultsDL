@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Typography, Button, Box } from '@material-ui/core';
 import OrdersTable from '../Componets/OrdersTable';
-import { CircularProgress, LinearProgress, Stack } from '@mui/material';
+import { CircularProgress, Stack } from '@mui/material';
 import { processOrdersReply } from '../Processors/OrderProcessor';
 import { Order } from '../Types/interfaces';
 import { creationPageProcessor } from '../Processors/CreationPageProcessor';
@@ -10,6 +10,10 @@ import { FetchFilesDataButton } from '../Componets/Orders/FetchFileDataButton';
 import DownloadProgress from '../Componets/DownloadProgress';
 
 const ipcRenderer = window.electron.ipcRenderer;
+
+interface SomeRow {
+	id: number
+}
 
 const OrdersPage: React.FC = () => {
 	const handleFetchOrders = (): void => {
@@ -28,7 +32,7 @@ const OrdersPage: React.FC = () => {
 	let ordersLocal: Order[] = [];
 
 	useEffect(() => {
-		const orderRowsData: Order[] = ordersWithCreations.filter((row: Record<string, any>) => {
+		const orderRowsData: Order[] = ordersWithCreations.filter((row: SomeRow) => {
 			if (row.id === undefined) {
 				return null;
 			}
@@ -130,21 +134,6 @@ const OrdersPage: React.FC = () => {
 				/>
 			</Stack>
 
-			{/* <Box className={showProgress ? 'slideIn' : 'slideOut'}> */}
-			{/*	{(progress.fileName !== '') && ( */}
-			{/*		<Typography variant="body2"> */}
-			{/*			{(progress.totalInQueue !== 0) && ( */}
-			{/*				<> */}
-			{/*          Downloads in Queue: {progress.totalInQueue + 1} */}
-			{/*					<br /> */}
-			{/*				</> */}
-			{/*			)} */}
-			{/*    Current Download: {progress.fileName} */}
-			{/*		</Typography> */}
-			{/*	)} */}
-			{/* </Box> */}
-
-			{/* <LinearProgress variant="determinate" value={progress.progress}/> */}
 			<DownloadProgress/>
 			<OrdersTable rows={ordersWithCreations} onSelectionChange={setSelectedOrderRows}/>
 		</Box>

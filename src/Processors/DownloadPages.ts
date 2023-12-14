@@ -1,16 +1,31 @@
 // fetchDownloadPage.ts
 import { BASE_URL } from '../Constants';
+import { Creation } from '../Types/interfaces';
 
 const ipcRenderer = window.electron.ipcRenderer;
 
-export async function fetchDownloadPage (selectedOrderRowsData: any): Promise<void> {
+interface OrderInfo {
+	orderId: number;
+	downloadLinks: Record<string, string[]>;
+}
+
+interface OrderRowData {
+	id: number;
+	creations: Creation[];
+	link: string;
+}
+
+export async function fetchDownloadPage (selectedOrderRowsData: OrderRowData[]): Promise<void> {
 	console.log('fetchDownloadPage', selectedOrderRowsData);
 
 	for (const orderRowData of selectedOrderRowsData) {
 		console.log('fetching download page for order', orderRowData.creations);
 		console.log('orderRowData', orderRowData);
-		await ipcRenderer.invoke('get-html-body', orderRowData.link).then(async (body) => {
-			let orderInfo: any = null;
+		await ipcRenderer.invoke('get-html-body', orderRowData.link).then(async (body: string) => {
+			let orderInfo: OrderInfo = {
+				orderId: 0,
+				downloadLinks: {}
+			};
 			const parser = new DOMParser();
 			const doc = parser.parseFromString(body, 'text/html');
 

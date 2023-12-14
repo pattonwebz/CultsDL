@@ -9,18 +9,14 @@ const getCultsCreationNumber = (link) => {
 	const pathComponents = url.pathname.split('/');
 
 	// Find the first component that is a number
-	const firstNumber = pathComponents.find(component => /^\d+$/.test(component));
-
-	return firstNumber;
+	return pathComponents.find(component => /^\d+$/.test(component));
 };
 
 const getCultsBlueprintNumber = (link) => {
 	const url = new URL(link);
 	const params = new URLSearchParams(url.search);
 
-	const blueprint = params.get('blueprint');
-
-	return blueprint;
+	return params.get('blueprint');
 };
 
 async function addFileToDatabase (file) {
@@ -83,6 +79,7 @@ const getAllFileRows = async () => {
 			resolve(rows);
 		});
 	});
+	closeDB(db);
 	return files;
 };
 
