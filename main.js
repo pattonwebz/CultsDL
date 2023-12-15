@@ -1,7 +1,7 @@
 // main.js
 const { app, BrowserWindow, ipcMain } = require('electron');
 const { getSessionToken, getUserData } = require('./Server/userDataStore');
-const { join } = require('path');
+const { join, dirname} = require('path');
 const { existsSync, mkdirSync, writeFileSync} = require('fs');
 const { setupIpcHandlers } = require('./Server/ipcHandlers');
 const { session } = require('electron');
@@ -214,8 +214,12 @@ ${tagString}`;
 			mkdirSync(downloadsDir);
 		}
 
+		const convertSlashesToUnderscores = (str) => {
+			return str.replace(/\//g, '_');
+		};
+
 		const downloadData = {
-			fileName: downloadItem.getFilename(),
+			fileName: convertSlashesToUnderscores(downloadItem.getFilename()),
 			size: downloadItem.getTotalBytes()
 		};
 
@@ -224,10 +228,10 @@ ${tagString}`;
 			if (!existsSync(downloadsDir + '/' + currentDownload.creator_name)) {
 				mkdirSync(downloadsDir + '/' + currentDownload.creator_name);
 			}
-			if (!existsSync(downloadsDir + '/' + currentDownload.creator_name + '/' + currentDownload.creation_name)) {
-				mkdirSync(downloadsDir + '/' + currentDownload.creator_name + '/' + currentDownload.creation_name);
+			if (!existsSync(downloadsDir + '/' + currentDownload.creator_name + '/' + convertSlashesToUnderscores(currentDownload.creation_name))) {
+				mkdirSync(downloadsDir + '/' + currentDownload.creator_name + '/' + convertSlashesToUnderscores(currentDownload.creation_name));
 			}
-			maybeCreatorAndCreation = currentDownload.creator_name + '/' + currentDownload.creation_name + '/';
+			maybeCreatorAndCreation = currentDownload.creator_name + '/' + convertSlashesToUnderscores(currentDownload.creation_name) + '/';
 		}
 
 		let maybeImage = '';
@@ -235,8 +239,12 @@ ${tagString}`;
 			maybeImage = 'Images/';
 		}
 
-		const filePath = downloadsDir + '/' + maybeCreatorAndCreation + maybeImage + downloadItem.getFilename();
+		const filePath = downloadsDir + '/' + maybeCreatorAndCreation + maybeImage + convertSlashesToUnderscores(downloadItem.getFilename());
 		logger.debug('filePath', { message: filePath });
+
+		if (!existsSync(dirname(filePath))) {
+			mkdirSync(dirname(filePath), { recursive: true });
+		}
 
 		// check if the filepath already exists
 
@@ -266,7 +274,7 @@ ${tagString}`;
 					logger.warn('Download is paused');
 				} else {
 					const progress = downloadItem.getReceivedBytes() / downloadItem.getTotalBytes();
-					const fileName = downloadItem.getFilename();
+					const fileName = convertSlashesToUnderscores(downloadItem.getFilename());
 
 					webContents.send('download-progress', {
 						totalInQueue: downloadQueue.length,
