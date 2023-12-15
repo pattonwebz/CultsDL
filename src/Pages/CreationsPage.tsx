@@ -54,10 +54,10 @@ const CreationsPage = () => {
 		{ field: 'tags', headerName: 'Tags', width: 350, hide: true },
 	];
 
-	const handleDownload = (creationId: number) => {
+	const handleDownload = (creationId: number, triggerStart: boolean = true) => {
 		console.log('download');
 		// get the creation ID from the clicked button and find all the file
-		if (!rows ) {
+		if (!rows) {
 			return;
 		}
 		const creation = rows.find(row => row.id === creationId).creation;
@@ -74,7 +74,10 @@ const CreationsPage = () => {
 		ipcRenderer.send('save-description', descriptionInfo);
 
 		console.log(files);
-		ipcRenderer.send('enable-full-download');
+
+		if (triggerStart) {
+			ipcRenderer.send('enable-full-download');
+		}
 
 		console.log('images', images);
 
@@ -99,7 +102,9 @@ const CreationsPage = () => {
 			ipcRenderer.send('download-file', downloadInfo);
 		});
 
-		ipcRenderer.send('start-download-queue');
+		if (triggerStart) {
+			ipcRenderer.send('start-download-queue');
+		}
 	};
 
 	useEffect(async () => {
@@ -123,10 +128,37 @@ const CreationsPage = () => {
 		setRows(rowsForTable);
 	}, []);
 
-	const [rowsSelected, setRowsSelected] = React.useState([]);
+	const [rowsSelected, setRowsSelected] = React.useState<number[]>([]);
 
 	const handleSelectChange = (selection: any) => {
-		setRowsSelected(selection.selectionModel);
+		console.log('selection', selection);
+		setRowsSelected(selection);
+	};
+
+	const handleDownloadSelected = async () => {
+		// // if (!rowsSelected) {
+		// // 	await setTimeout(() => {
+		// // 		handleDownloadSelected();
+		// // 		return;
+		// // 	}, 2000);
+		// // }
+		// // wait for the rows to be selected
+		// await new Promise<void>((resolve) => {
+		// 	const interval = setInterval(() => {
+		// 		if (rowsSelected.length > 0) {
+		// 			clearInterval(interval);
+		// 			resolve();
+		// 		}
+		// 	}, 100);
+		// });
+
+		console.log('download selected');
+		console.log(rowsSelected);
+		rowsSelected.forEach(rowId => {
+			handleDownload(rowId, false);
+		});
+		ipcRenderer.send('enable-full-download');
+		ipcRenderer.send('start-download-queue');
 	};
 
 	return (
@@ -135,6 +167,9 @@ const CreationsPage = () => {
 				<Typography variant="h3" gutterBottom>
 					Creations Management
 				</Typography>
+				<ButtonGroup>
+					<Button onClick={handleDownloadSelected}>Download Selected</Button>
+				</ButtonGroup>
 				<DownloadProgress/>
 				<DataGrid
 					rows={rows}
