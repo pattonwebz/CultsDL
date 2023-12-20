@@ -1,8 +1,8 @@
 // main.js
 const { app, BrowserWindow, ipcMain } = require('electron');
 const { getSessionToken, getUserData } = require('./Server/userDataStore');
-const { join, dirname} = require('path');
-const { existsSync, mkdirSync, writeFileSync} = require('fs');
+const { join, dirname } = require('path');
+const { existsSync, mkdirSync, writeFileSync } = require('fs');
 const { setupIpcHandlers } = require('./Server/ipcHandlers');
 const { session } = require('electron');
 const { CONSTANTS } = require('./Server/constants');
@@ -77,23 +77,16 @@ function createWindow () {
 			}
 
 			let maybeCreatorAndCreation = '';
-			if (allowFullDownloads) {
-				if (!existsSync(downloadsDir + '/' + data.creator_name)) {
-					mkdirSync(downloadsDir + '/' + data.creator_name);
-				}
-				if (!existsSync(downloadsDir + '/' + data.creator_name + '/' + data.creation_name)) {
-					mkdirSync(downloadsDir + '/' + data.creator_name + '/' + data.creation_name);
-				}
-				maybeCreatorAndCreation = data.creator_name + '/' + data.creation_name + '/';
+
+			if (!existsSync(downloadsDir + '/' + data.creator_name)) {
+				mkdirSync(downloadsDir + '/' + data.creator_name);
 			}
+			if (!existsSync(downloadsDir + '/' + data.creator_name + '/' + data.creation_name)) {
+				mkdirSync(downloadsDir + '/' + data.creator_name + '/' + data.creation_name);
+			}
+			maybeCreatorAndCreation = data.creator_name + '/' + data.creation_name + '/';
 
 			const filePath = downloadsDir + '/' + maybeCreatorAndCreation + 'description.txt';
-
-			const tagString = data.tags.length === 0
-				? ''
-				: data.tags.map((tag) => {
-					return '#' + tag;
-				}).join(' ');
 
 			logger.debug('filePath', { message: filePath });
 			let descriptionString =
@@ -106,7 +99,16 @@ by ${data.creator_name}`;
 
 \`\`\`
 ${data.description}
-\`\`\``;
+\`\`\`
+
+
+`;
+			}
+
+			if (data.link && data.link.includes('cults3d.com')) {
+				descriptionString += `
+
+${data.link}`;
 			}
 
 			if (data.tags.length) {
@@ -119,7 +121,6 @@ ${data.description}
 				descriptionString += `
 
 ${tagString}`;
-
 			}
 
 			logger.debug('descriptionString', { message: descriptionString });
@@ -188,6 +189,7 @@ ${tagString}`;
 				await isAlreadyInDB(downloadData.link);
 			} else {
 				currentDownload = downloadData;
+
 				logger.debug('startNextDownload', downloadData);
 				await win.webContents.downloadURL(downloadData.link);
 			}
@@ -205,8 +207,7 @@ ${tagString}`;
 		if (!cookieSet) {
 			trySetCookie();
 		}
-		// logger.debug('will-download', downloadItem.getFilename());
-		// Set the save path, making Electron notdownloadData to prompt a save dialog.
+
 		const userSavedDownloadDirectory = getUserData('downloadDirectory');
 		const downloadsDir = userSavedDownloadDirectory !== '' ? userSavedDownloadDirectory : DOWNLOAD_DIR;
 
@@ -245,8 +246,6 @@ ${tagString}`;
 		if (!existsSync(dirname(filePath))) {
 			mkdirSync(dirname(filePath), { recursive: true });
 		}
-
-		// check if the filepath already exists
 
 		downloadItem.setSavePath(filePath);
 
@@ -289,6 +288,11 @@ ${tagString}`;
 		downloadItem.once('done', (event, state) => {
 			if (state === 'completed') {
 				logger.info('Download successfully');
+				win.webContents.send('download-progress', {
+					totalInQueue: downloadQueue.length,
+					progress: 0,
+					fileName: ''
+				});
 			} else {
 				logger.warn(`Download failed: ${state}`);
 			}

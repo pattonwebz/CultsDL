@@ -67,6 +67,7 @@ const CreationsPage = () => {
 		const descriptionInfo = {
 			creator_name: creation.creator,
 			creation_name: creation.name,
+			creation_link: creation.link,
 			description: creation.description,
 			tags: JSON.parse(creation.tags),
 			type: 'description'
